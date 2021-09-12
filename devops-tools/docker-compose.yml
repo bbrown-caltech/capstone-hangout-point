@@ -1,0 +1,76 @@
+version: '3.5'
+services:
+
+  ##########################################################################
+  #  CORE SERVICES
+  ##########################################################################
+  nginx:
+    container_name: nginx
+    image: ${NGINX}
+    restart: unless-stopped
+    networks:
+      - simplilearn
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./config/:/etc/nginx/:ro
+
+  ##########################################################################
+  #  CI/CD Application(s) and Service(s)
+  ##########################################################################
+  jenkins:
+    container_name: jenkins
+    image: ${JENKINS}
+    user: root
+    restart: unless-stopped
+    depends_on:
+      - nginx
+    networks:
+      - simplilearn
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    environment:
+      JENKINS_OPTS: "--prefix=/jenkins"
+    volumes:
+      - jenkins_data:/var/jenkins_home:z
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /usr/bin/docker:/usr/bin/docker
+      - /usr/local/bin/docker-compose:/usr/local/bin/docker-compose
+
+  # Repository Manager
+  nexus:
+    container_name: nexus
+    image: ${NEXUS}
+    restart: unless-stopped
+    networks:
+      - simplilearn
+    volumes:
+      - nexus_data:/nexus-data:z
+
+  ##########################################################################
+  #  CM Application(s) and Service(s)
+  ##########################################################################
+  ansible:
+    container_name: ansible
+    build:
+      context: .
+      dockerfile: ./docker-files/Ansible.Dockerfile
+    user: root
+    restart: unless-stopped
+    networks:
+      - simplilearn
+    # volumes:
+    #   - ./conf/ansible/playbooks:/playbooks
+
+      
+
+
+volumes:
+  jenkins_data:
+  nexus_data:
+
+networks:
+  simplilearn:
+    driver: bridge
