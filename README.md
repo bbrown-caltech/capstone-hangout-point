@@ -93,7 +93,7 @@ While the above is a step in the right direction it should not be viewed as the 
         Regression and integration testing processes should be evaluated for automated testing opportunities and where possible testing automation should be implemented.
     </li>
     <li>
-        Finally, consideration should be given for implementing one of the many service mesh variants. Such an implementation would provide the following benefits:
+        Consideration should be given for implementing one of the many service mesh variants. Such an implementation would provide the following benefits:
             <ol>
                 <li>
                     <strong><i>Observability:</i> </strong>Because it's a dedicated infrastructure layer, service mesh is uniquely positioned to provide telemetry metrics at the service call level.
@@ -105,6 +105,9 @@ While the above is a step in the right direction it should not be viewed as the 
                     <strong><i>Security:</i> </strong>Service mesh hardens individual services through things like certificate-based service-to-service authentication, traffic encryption between services and security policy enforcement.
                 </li>
             </ol>
+    </li>
+    <li>
+        Finally, when resources permit, consideration should be given to setting up Jenkins in a Master/Slave configuration with at least two build nodes running on different VM's. This will further eliminate latency and improve build efficieny and timeliness.
     </li>
 </ol>
 
