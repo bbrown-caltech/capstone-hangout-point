@@ -1,13 +1,19 @@
 
-@Library('jenkins-shared') _
+// @Library('jenkins-shared') _
 
-import src.caltech.simplilearn.JenkinsConstants
+// import src.caltech.simplilearn.JenkinsConstants
 
 pipeline {
     agent {
         label 'caltech'
     }
     environment {
+        CREDENTIALS_ID = 'caltech'
+        DOCKER_REGISTRY = 'docker.brianbrown.me'
+        HELM_IMAGE = 'docker.brianbrown.me/tools/debian-11/helm:3.7.0'
+        YAML_PARSER = 'docker.brianbrown.me/tools/python/yaml-parser:3.9.6'
+        HELM_REPOSITORY = "https://nexus.brianbrown.me/repository/helm/"
+        CHART_OUTPUT_DIRECTORY = "/charts"
         GIT_BASE_PATH = "capstone-hangout-point"
         GIT_CODE_PATH = "application/code/scheduling-manager"
         GIT_DOCKER_PATH = "docker"
@@ -40,7 +46,7 @@ pipeline {
         stage('Push Docker Image') {
             steps {
                 script {
-                    docker.withRegistry( 'https://${JenkinsConstants.DOCKER_REGISTRY}', '${JenkinsConstants.CREDENTIALS_ID}' ) {
+                    docker.withRegistry( 'https://${DOCKER_REGISTRY}', '${CREDENTIALS_ID}' ) {
                         DOCKER_IMAGE.push("$IMAGE_TAG")
                     }
                 }
@@ -49,13 +55,13 @@ pipeline {
         stage('Build Helm Chart') {
             steps {
                 script {
-                    docker.withRegistry( 'https://${JenkinsConstants.DOCKER_REGISTRY}', '${JenkinsConstants.CREDENTIALS_ID}' ) {
-                        def CHART_VERSION=docker.image('${JenkinsConstants.YAML_PARSER}').run('-it --rm -v ${CHART_PARENT_PATH}${CHART_PATH}:/chart -e YAML_FILE=/chart/Chart.yaml', 'version')
+                    docker.withRegistry( 'https://${DOCKER_REGISTRY}', '${CREDENTIALS_ID}' ) {
+                        def CHART_VERSION=docker.image('${YAML_PARSER}').run('-it --rm -v ${CHART_PARENT_PATH}${CHART_PATH}:/chart -e YAML_FILE=/chart/Chart.yaml', 'version')
                         def CHART_FILE_NAME="${CHART_NAME}-${CHART_VERSION}.tgz"
                         def CHART_FILE_PATH="/tmp/${CHART_FILE_NAME}"
-                        def HELM_REPO_URL="${JenkinsConstants.HELM_REPOSITORY}${CHART_FILE_NAME}"
+                        def HELM_REPO_URL="${HELM_REPOSITORY}${CHART_FILE_NAME}"
         
-                        docker.image('${JenkinsConstants.HELM_IMAGE}').run('-v ${CHART_PARENT_PATH}:/chart \
+                        docker.image('${HELM_IMAGE}').run('-v ${CHART_PARENT_PATH}:/chart \
                                                                             -v /tmp:/tmp \
                                                                             -e CHART_PATH=${CHART_PATH} \
                                                                             -e CHART_FILE_PATH=${CHART_FILE_PATH} \
