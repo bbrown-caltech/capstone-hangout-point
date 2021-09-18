@@ -1,7 +1,7 @@
 
 @Library('jenkins-shared') _
 
-import caltech.simplilearn.JenkinsConstants
+import src.caltech.simplilearn.JenkinsConstants
 
 pipeline {
     agent {
