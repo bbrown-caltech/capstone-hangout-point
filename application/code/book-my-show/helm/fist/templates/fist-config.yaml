@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fist-config
+  namespace: fist
+  labels:
+    name: fist-config
+    type: local
+{{- with .Values.configuration }}
+data:
+{{ toYaml . | indent 2 }}
+{{- end }}

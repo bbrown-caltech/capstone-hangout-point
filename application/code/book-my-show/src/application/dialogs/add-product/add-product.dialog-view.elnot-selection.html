@@ -1,0 +1,133 @@
+<div class="div-row">
+    <div class="div-col-0475">
+        <div class="div-row">
+            <div class="div-col-06">
+                <span><strong><binding model="ElnotSelectionMessage"></binding></strong></span>
+            </div>
+            <div class="div-col-02">&nbsp;</div>
+            <div class="div-col-02">
+                <span class="float-right">Selected: (<binding model="TotalSelected"></binding>)</span>
+            </div>
+            <div class="div-col-10 elnot-selection-row" ng-hidden="getShowFilter()">
+                <input id="elnotFilter" type="text" class="frm-ctl-elemt" placeholder="Filter ELNOT's">
+            </div>
+        </div>
+        <div class="div-row">
+            <div id="containerCol" class="div-col-10">
+                <div id="container" class="elnot-container">
+                    <div id="elnotRepeat" title="Emitter: {{name}}&#013Function: {{function}}" class="elnot-item" ng-class="setElnotClass()" click="selectElnot()">{{elnot}}</div>
+                </div>
+            </div>
+            <div class="div-col-10 elnot-selection-row">
+                <div id="elnotPaginator"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="div-col-half">&nbsp;</div>
+    
+    <div class="div-col-0475">
+        <div class="div-row">
+            <div class="div-col-10">
+                <label for="selectedElnotFilter">Selected Elnots</label>
+                <input id="selectedElnotFilter" type="text" class="frm-ctl-elemt" placeholder="Filter Selected ELNOT's">
+            </div>
+        </div>
+        <div class="div-row">
+            <div class="div-col-10">
+                <div class="elnot-container">
+                    <div id="selectedElnotRepeat" title="Emitter: {{name}}&#013Function: {{function}}" class="elnot-item" ng-class="setElnotClass()" click="selectElnot()">{{elnot}}</div>
+                </div>
+            </div>
+            <div class="div-col-10 elnot-selection-row">
+                <div id="selectedElnotPaginator"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="dov-row">
+    <div class="div-col-10">
+        <div class='emitter-info-list'>
+            <table>
+                <thead>
+                    <tr>
+                        <th class="hdrCell">
+                            <span>Name</span>
+                        </th>
+                        <th class="hdrCell">
+                            <span>Function</span>
+                        </th>
+                        <th class="hdrCell">
+                            <span>Date Updated</span>
+                        </th>
+                        <th class="hdrCell">
+                            <span>Status</span>
+                        </th>
+                        <th class="hdrCell">
+                            <span>Prim Platform</span>
+                        </th>
+                        </th>
+                        <!-- <th class="hdrCell">
+                            <span>Origin Countries</span>
+                        </th>
+                        </th>
+                        <th class="hdrCell">
+                            <span>User Countries</span>
+                        </th>
+                        </th>
+                        <th class="hdrCell">
+                            <span>Platforms</span>
+                        </th> -->
+                        <!-- <th>
+                            <button click="showEmitterInfoFilter()"><i class="fas fa-filter"></i></button>
+                        </th> -->
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-hidden="displayEmitterFilter()">
+                        <td>
+                            <input type="text" id="emitterNameFilter" class="frm-ctl-elemt">
+                        </td>
+                        <td>
+                            <input type="text" id="functionFilter" class="frm-ctl-elemt">
+                        </td>
+                        <td>
+                            <input type="text" id="cedUpdateFilter" class="frm-ctl-elemt">
+                        </td>
+                        <td>
+                            <input type="text" id="statusFilter" class="frm-ctl-elemt">
+                        </td>
+                        <td>
+                            <input type="text" id="primaryPlatformFilter" class="frm-ctl-elemt">
+                        </td>
+                        <!-- <td>
+                            <input type="text" id="originCountriesFilter" class="frm-ctl-elemt">
+                        </td>
+                        <td>
+                            <input type="text" id="userCountriesFilter" class="frm-ctl-elemt">
+                        </td>
+                        <td>
+                            <input type="text" id="platformTypesFilter" class="frm-ctl-elemt">
+                        </td>
+                        <td colspan="2">
+                            <input type="text" id="secondaryNamesFilter" class="frm-ctl-elemt">
+                        </td> -->
+                    </tr>
+                </tbody>
+                <tbody>
+                    <tr id="emitterInfoList" class="emitter-list-item-{{emitterId}}">
+                        <td>{{name}}</td>
+                        <td>{{function}}</td>
+                        <td>{{cedUpdateDate}}</td>
+                        <td>{{status}}</td>
+                        <td>{{primaryPlatformType}}</td>
+                        <!-- <td>{{originCountryCodes}}</td>
+                        <td>{{userCountryCodes}}</td>
+                        <td>{{platformTypes}}</td>
+                        <td colspan="2">{{secondaryNames}}</td> -->
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,72 @@
+
+@Library('jenkins-shared') _
+
+import caltech.simplilearn.JenkinsConstants
+
+pipeline {
+    agent {
+        label 'caltech'
+    }
+    environment {
+        GIT_BASE_PATH = "capstone-hangout-point"
+        GIT_CODE_PATH = "application/code/scheduling-manager"
+        GIT_DOCKER_PATH = "docker"
+        CHART_PARENT_PATH="./capstone-hangout-point/application/code/scheduling-manager/helm"
+        CHART_PATH="/scheduling-manager"
+        IMAGE_NAME = "docker.brianbrown.me/scheduling-manager"
+        DOCKERFILE_PATH = "application/code/scheduling-manager/Dockerfile"
+        APPLICATION_NAME = "scheduling-manager"
+        DOCKER_IMAGE = ''
+        IMAGE_TAG = ''
+    }
+    stages {
+        stage('Build Docker Image') {
+            steps {
+               script {
+                   DOCKER_IMAGE = docker.build("${IMAGE_NAME}", "--no-cache -f ./${DOCKERFILE_PATH} ./${GIT_CODE_PATH}/")
+                   //   Development Testing/Deployment
+                   IMAGE_TAG = "develop";
+                   //   Production Deployment
+                   if ((BRANCH_NAME ==~/^(\d+\.\d+\.\d+)/)) {
+                       IMAGE_TAG = BRANCH_NAME;
+                   }
+                   //   UAT Deployment
+                   if ((BRANCH_NAME ==~/(main)/)) {
+                       IMAGE_TAG = "latest";
+                   }
+               }
+            }
+        }
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    docker.withRegistry( 'https://${JenkinsConstants.DOCKER_REGISTRY}', '${JenkinsConstants.CREDENTIALS_ID}' ) {
+                        DOCKER_IMAGE.push("$IMAGE_TAG")
+                    }
+                }
+            }
+        }
+        stage('Build Helm Chart') {
+            steps {
+                script {
+                    docker.withRegistry( 'https://${JenkinsConstants.DOCKER_REGISTRY}', '${JenkinsConstants.CREDENTIALS_ID}' ) {
+                        def CHART_VERSION=docker.image('${JenkinsConstants.YAML_PARSER}').run('-it --rm -v ${CHART_PARENT_PATH}${CHART_PATH}:/chart -e YAML_FILE=/chart/Chart.yaml', 'version')
+                        def CHART_FILE_NAME="${CHART_NAME}-${CHART_VERSION}.tgz"
+                        def CHART_FILE_PATH="/tmp/${CHART_FILE_NAME}"
+                        def HELM_REPO_URL="${JenkinsConstants.HELM_REPOSITORY}${CHART_FILE_NAME}"
+        
+                        docker.image('${JenkinsConstants.HELM_IMAGE}').run('-v ${CHART_PARENT_PATH}:/chart \
+                                                                            -v /tmp:/tmp \
+                                                                            -e CHART_PATH=${CHART_PATH} \
+                                                                            -e CHART_FILE_PATH=${CHART_FILE_PATH} \
+                                                                            -e HELM_REPO_URL=${HELM_REPO_URL}',
+                                                                            'package /chart$CHART_PATH -d /tmp \
+                                                                                &&  ls /tmp -al \
+                                                                                &&  curl -k -v -u caltech:Password123 --upload-file ${CHART_FILE_PATH} ${HELM_REPO_URL}')
+                    }
+                }
+            }
+        }
+    }
+    
+}

@@ -1,0 +1,16 @@
+
+image:
+  pullPolicy: Always
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "develop"
+
+
+configuration:
+  app:
+    prefix: "api"
+  mongo:
+    port: 27017
+    host: 'mongodb'
+    database: bookmytrip
+  swagger:
+    serverUrl: 'http://localhost/api'
