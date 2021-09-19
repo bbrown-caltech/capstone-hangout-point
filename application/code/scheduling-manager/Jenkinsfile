@@ -1,35 +1,42 @@
 
-// @Library('jenkins-shared') _
-
-// import src.caltech.simplilearn.JenkinsConstants
 
 pipeline {
     agent {
         label 'caltech'
     }
     environment {
-        CREDENTIALS_ID = 'caltech'
-        DOCKER_REGISTRY = 'docker.brianbrown.me'
-        HELM_IMAGE = 'docker.brianbrown.me/tools/debian-11/helm:3.7.0'
-        YAML_PARSER = 'docker.brianbrown.me/tools/python/yaml-parser:3.9.6'
-        HELM_REPOSITORY = "https://nexus.brianbrown.me/repository/helm/"
-        CHART_OUTPUT_DIRECTORY = "/charts"
-        GIT_BASE_PATH = "capstone-hangout-point"
+        APPLICATION_NAME = "scheduling-manager"
+        REPOSITORY="https://github.com/bbrown-caltech/capstone-hangout-point.git"
         GIT_CODE_PATH = "application/code/scheduling-manager"
-        GIT_DOCKER_PATH = "docker"
-        CHART_PARENT_PATH="./capstone-hangout-point/application/code/scheduling-manager/helm"
-        CHART_PATH="/scheduling-manager"
+
+        DOCKER_REGISTRY = 'docker.brianbrown.me'
+        CREDENTIALS_ID = 'caltech'
         IMAGE_NAME = "docker.brianbrown.me/scheduling-manager"
         DOCKERFILE_PATH = "application/code/scheduling-manager/Dockerfile"
-        APPLICATION_NAME = "scheduling-manager"
+
+        HELM_REPOSITORY = "https://nexus.brianbrown.me/repository/helm/"
+        HELM_IMAGE = 'docker.brianbrown.me/tools/debian-11/helm:3.7.0'
+
         DOCKER_IMAGE = ''
         IMAGE_TAG = ''
+        CHART_VERSION = ''
+        CHART_FILE_NAME = ''
+        HELM_REPO_URL = ''
     }
     stages {
+		/**************************************************************
+		 *	RUN ALWAYS
+		 **************************************************************/
+		stage('Run Unit Tests') {
+			steps {
+				script {
+					sh "echo \"Running unit tests...\""
+				}
+			}
+		}
         stage('Build Docker Image') {
             steps {
                script {
-                   DOCKER_IMAGE = docker.build("${IMAGE_NAME}", "--no-cache -f ./${DOCKERFILE_PATH} ./${GIT_CODE_PATH}/")
                    //   Development Testing/Deployment
                    IMAGE_TAG = "develop";
                    //   Production Deployment
@@ -40,35 +47,53 @@ pipeline {
                    if ((BRANCH_NAME ==~/(main)/)) {
                        IMAGE_TAG = "latest";
                    }
+                   DOCKER_IMAGE = docker.build("${IMAGE_NAME}", "--no-cache -f ./${DOCKERFILE_PATH} ./${GIT_CODE_PATH}/")
                }
             }
         }
         stage('Push Docker Image') {
             steps {
                 script {
-                    docker.withRegistry( 'https://${DOCKER_REGISTRY}', '${CREDENTIALS_ID}' ) {
+                    docker.withRegistry( "https://${DOCKER_REGISTRY}", "${CREDENTIALS_ID}" ) {
                         DOCKER_IMAGE.push("$IMAGE_TAG")
                     }
                 }
             }
         }
-        stage('Build Helm Chart') {
+		
+		/**************************************************************
+		 *	RUN ONLY AFTER MERGE INTO DEVELOP MAIN OR RELEASE TAGGED
+		 **************************************************************/
+        stage('Prepare to Build Helm Chart') {
             steps {
                 script {
-                    docker.withRegistry( 'https://${DOCKER_REGISTRY}', '${CREDENTIALS_ID}' ) {
-                        def CHART_VERSION=docker.image('${YAML_PARSER}').run('-it --rm -v ${CHART_PARENT_PATH}${CHART_PATH}:/chart -e YAML_FILE=/chart/Chart.yaml', 'version')
-                        def CHART_FILE_NAME="${CHART_NAME}-${CHART_VERSION}.tgz"
-                        def CHART_FILE_PATH="/tmp/${CHART_FILE_NAME}"
-                        def HELM_REPO_URL="${HELM_REPOSITORY}${CHART_FILE_NAME}"
-        
-                        docker.image('${HELM_IMAGE}').run('-v ${CHART_PARENT_PATH}:/chart \
-                                                                            -v /tmp:/tmp \
-                                                                            -e CHART_PATH=${CHART_PATH} \
-                                                                            -e CHART_FILE_PATH=${CHART_FILE_PATH} \
-                                                                            -e HELM_REPO_URL=${HELM_REPO_URL}',
-                                                                            'package /chart$CHART_PATH -d /tmp \
-                                                                                &&  ls /tmp -al \
-                                                                                &&  curl -k -v -u caltech:Password123 --upload-file ${CHART_FILE_PATH} ${HELM_REPO_URL}')
+                    def YAML_FILE="/source/capstone-hangout-point/application/code/scheduling-manager/helm/scheduling-manager/Chart.yaml"
+                    def CHART_PATH="/source/capstone-hangout-point/application/code/scheduling-manager/helm/scheduling-manager"
+                    def CHART_PARENT_PATH="/source/capstone-hangout-point/application/code/scheduling-manager/helm"
+
+                    docker.withRegistry( "https://${DOCKER_REGISTRY}", "${CREDENTIALS_ID}" ) {
+                        docker.image(HELM_IMAGE).pull()
+						
+                        docker.image(HELM_IMAGE).inside("--entrypoint=") {
+							
+							stage('Getting Chart Version') {
+							    def CHART_YAML_FILE="${CHART_PATH}/Chart.yaml"
+								sh "git -C /source clone -b ${BRANCH_NAME} ${REPOSITORY}"
+								CHART_VERSION=sh(script: "python /scripts/yaml_parser.py version ${CHART_YAML_FILE}", returnStdout: true)
+							}
+							
+							stage('Packaging Helm Chart') {
+								sh "helm package ${CHART_PATH} -d ${CHART_PARENT_PATH}"
+								CHART_FILE_NAME="${CHART_PARENT_PATH}/${APPLICATION_NAME}-${CHART_VERSION}.tgz"
+							}
+							
+							stage('Upload Helm Chart') {
+								HELM_REPO_URL="${HELM_REPOSITORY}${APPLICATION_NAME}-${CHART_VERSION}.tgz"
+								sh "curl -k -v -u 'caltech:Password123' --upload-file ${CHART_FILE_NAME} ${HELM_REPO_URL}"
+							}
+							
+						}
+						
                     }
                 }
             }

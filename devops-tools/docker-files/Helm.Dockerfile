@@ -1,7 +1,13 @@
-FROM debian:11.0
+FROM python:3.9.6
+
+ENV BRANCH=''
+ENV REPOSITORY=''
+ENV CHART_NAME=''
+ENV CHART_PATH=''
+ENV CHART_PARENT_PATH=''
 
 RUN apt update
-RUN apt install -y wget git curl
+RUN apt install -y vim wget git curl
 
 WORKDIR /tmp
 
@@ -9,8 +15,16 @@ RUN wget https://get.helm.sh/helm-v3.7.0-linux-amd64.tar.gz
 RUN tar -zxvf helm-v3.7.0-linux-amd64.tar.gz
 RUN mv linux-amd64/helm /usr/local/bin/helm
 
-RUN helm plugin install --version master https://github.com/sonatype-nexus-community/helm-nexus-push.git
+RUN pip install pyyaml
 
-WORKDIR /
+RUN mkdir -p /source
+RUN mkdir -p /scripts
+COPY ./config/misc/yaml_parser.py /scripts
+COPY ./config/misc/yaml_parser.sh /scripts
 
-ENTRYPOINT [ "helm" ]
+RUN chmod +x /scripts/yaml_parser.sh
+
+WORKDIR /source
+
+ENTRYPOINT [ "/bin/bash" ]
+# ENTRYPOINT [ "helm" ]
