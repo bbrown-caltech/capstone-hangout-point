@@ -1,9 +1,9 @@
 version: '3.5'
 services:
 
-  ##########################################################################
-  #  CORE SERVICES
-  ##########################################################################
+##########################################################################
+#  CORE SERVICES
+##########################################################################
   nginx:
     container_name: nginx
     image: ${NGINX}
@@ -14,30 +14,29 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./config/:/etc/nginx/:ro
+      - ./conf/:/etc/nginx/
+      - ./certs:/etc/nginx/certs
 
-  ##########################################################################
-  #  CI/CD Application(s) and Service(s)
-  ##########################################################################
+##########################################################################
+#  CI/CD Application(s) and Service(s)
+##########################################################################
+
+  # Jenkins Nodes
   jenkins:
     container_name: jenkins
-    image: ${JENKINS}
+    build:
+      context: .
+      dockerfile: ./docker-files/Jenkins.Dockerfile
     user: root
     restart: unless-stopped
-    depends_on:
-      - nginx
     networks:
       - simplilearn
-    ports:
-      - "8080:8080"
-      - "50000:50000"
-    environment:
-      JENKINS_OPTS: "--prefix=/jenkins"
     volumes:
       - jenkins_data:/var/jenkins_home:z
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/docker:/etc/docker
+      - "/root/.docker:$HOME/.docker"
       - /usr/bin/docker:/usr/bin/docker
-      - /usr/local/bin/docker-compose:/usr/local/bin/docker-compose
+      - /var/run/docker.sock:/var/run/docker.sock
 
   # Repository Manager
   nexus:
@@ -49,9 +48,9 @@ services:
     volumes:
       - nexus_data:/nexus-data:z
 
-  ##########################################################################
-  #  CM Application(s) and Service(s)
-  ##########################################################################
+##########################################################################
+#  CM Application(s) and Service(s)
+##########################################################################
   ansible:
     container_name: ansible
     build:
@@ -61,10 +60,9 @@ services:
     restart: unless-stopped
     networks:
       - simplilearn
-    # volumes:
-    #   - ./conf/ansible/playbooks:/playbooks
-
-      
+    volumes:
+      - ./config/ansible/playbooks:/playbooks
+      - /usr/local/bin/kubectl:/usr/bin/kubectl
 
 
 volumes:

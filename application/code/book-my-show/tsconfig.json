@@ -1,0 +1,30 @@
+{
+    "compilerOptions": {
+        "baseUrl": ".",
+        "target": "es2018",
+        "module": "esNext",
+        "outDir": "build/js",
+        "rootDir": "src",
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "removeComments": true,
+        "moduleResolution": "node",
+        "lib": ["es2018","DOM"],
+        "types": [
+          "reflect-metadata"
+        ],
+        "paths": {
+          "@Framework/*": ["src/framework/*"],
+          "@Application/*": ["src/application/*"],
+          "*": ["node_modules/*"]
+        }
+    },
+    "include": [
+      "src/**/*"
+    ],
+    "exclude": [
+      "node_modules",
+      "features",
+      "features/**"
+    ]
+}

@@ -1,0 +1,599 @@
+/* You can add global styles to this file, and also import other style files */
+@import "./form-controls.0.1.scss";
+@import "./layout.0.1.scss";
+@import '../../../../node_modules/pikaday/scss/pikaday.scss';
+@import '../../../application/views/product/product.view.scss';
+
+$airforce_darkest_blue: #002b80;
+$airforce_medium_blue: #00338f;
+$airforce_lightest_blue: #00369e;
+$airforce_blue_line: #174068;
+$airforce_bluebg_font: #f3c055;
+
+$airforce_gold: #d2af39;
+$airforce_dark_gold: #b6860a;
+$airforce_gold_line: #f3c055;
+$airforce_goldbg_font: #222;
+
+html, body { width: 100%; height: 100%; }
+body { 
+    padding: 0;
+    margin: 0;
+    font-family: Arial, Verdana, Geneva, Tahoma, sans-serif; 
+    font-size: 1em;
+    line-height: 1.22857143;
+    background-color: $airforce_darkest_blue;
+    color: $airforce_gold;
+}
+
+
+.account-icon {
+    width: 40px;
+    height: 40px;
+    padding-left: 10px;
+    padding-top: 10px;
+    // align-items: center;
+    cursor: pointer;
+    float: right;
+    margin-top: 5px;
+    margin-right: 50px;
+    
+    &:hover {
+        border: solid 2px #fff;
+    }
+    
+}
+
+ng-menu {
+    background-color: #fff;
+    color: #333;
+    margin-top: 2px !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    margin-bottom: 0 !important;
+    padding: 0 !important;
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+    font-size: 90%;
+    // width: 200px;
+    // height: auto;
+    cursor: pointer;
+    display: inline-table;
+    border: solid 1px #eaeaea;
+    border-radius: 5px;
+    
+}
+
+menu-item {
+    // width: 100%;
+    height: 25px;
+    line-height: 25px;
+    padding-right: 15px;
+    padding-left: 15px;
+    display: block;
+    
+    &:hover {
+        background-color: $airforce_medium_blue;
+        color: $airforce_bluebg_font;
+    }
+    
+}
+
+.menu-item-no-command {
+    // width: 100%;
+    // height: 25px;
+    // line-height: 25px;
+    padding-right: 5px !important;
+    padding-left: 5px !important;
+    display: block;
+    cursor: default !important;
+    
+    &:hover {
+        background-color: #fff !important;
+        color: #333 !important;
+    }
+    
+}
+
+.mat-menu-label {
+    color: #333;
+    padding: 10px;
+    font-size: 90%;
+}
+
+.component-title {
+    font-size: 200%;
+    font-weight: bolder;
+    color: #555;
+}
+
+.btn-af-blue {
+    // border: 0.1vw solid $airforce_blue_line;
+    border: none;
+    color: #fff;
+    // background: linear-gradient($airforce_darkest_blue, $airforce_medium_blue);
+    background-color: $airforce_darkest_blue;
+
+    &:focus {
+        outline: none;
+        color: #fff;
+        background: linear-gradient($airforce_medium_blue, $airforce_lightest_blue);
+        background-size: cover;
+        border-color: $airforce_darkest_blue;
+    }
+
+    &:hover {
+        outline: none;
+        color: #fff;
+        background: linear-gradient($airforce_medium_blue, $airforce_lightest_blue);
+        background-size: cover;
+        border-color: $airforce_darkest_blue;
+    }
+
+    &:active {
+        outline: none;
+        color: #fff;
+        background: linear-gradient($airforce_lightest_blue, #0e2a7b);
+        background-size: cover;
+        border-color: $airforce_darkest_blue;
+    }
+}
+
+.btn-af-gold {
+    border: 0.1vw solid $airforce_gold_line;
+    color: $airforce_goldbg_font;
+    background: linear-gradient($airforce_gold, $airforce_dark_gold);
+
+    &:focus {
+        outline: none;
+        color: $airforce_goldbg_font;
+        background: linear-gradient($airforce_dark_gold, #a77d16);
+        background-size: cover;
+        border-color: $airforce_gold;
+    }
+
+    &:hover {
+        outline: none;
+        color: $airforce_goldbg_font;
+        background: linear-gradient($airforce_dark_gold, #a77d16);
+        background-size: cover;
+        border-color: $airforce_gold;
+    }
+
+    &:active {
+        outline: none;
+        color: $airforce_goldbg_font;
+        background: linear-gradient(#a77d16, #7c5b10);
+        background-size: cover;
+        border-color: $airforce_gold;
+    }
+}
+
+.btn-ctl-height {
+    height: 30px !important;
+    line-height: 30px !important;
+}
+
+
+.header-container {
+    padding: 10px;
+    color: #fff;
+    background-color: $airforce_darkest_blue;
+    
+    .header {
+        width: 100%;
+        height: 70px;
+        line-height: 100px;
+        
+        .title {
+            font-size: 2rem;
+            line-height: 50px;
+        }
+        
+        a {
+            color: #fffbfb;
+            text-decoration: none;
+        }
+        
+    }
+    
+}
+
+.footer-container {
+    margin-top: 10px;
+    padding: 10px;
+    color: #fff;
+    background-color: $airforce_darkest_blue;
+    
+    .footer {
+        width: 100%;
+        height: 25px;
+        font-size: 70%;
+        line-height: 20px;
+        text-align: right;
+        background-color: $airforce_darkest_blue;
+    }
+    
+}
+
+
+.fill-space {
+    // This fills the remaining space, by using flexbox.
+    // Every toolbar row uses a flexbox row layout.
+    flex: 1 1 auto;
+}
+
+
+.border-left-divider {
+    border-left: #222 solid 1px !important;
+}
+
+.border-top-divider {
+    border-top: #222 solid 1px !important;
+}
+
+.border-right-divider {
+    border-right: #222 solid 1px !important;
+}
+
+.border-bottom-divider {
+    border-bottom: #222 solid 1px !important;
+}
+
+
+.input-filter {
+    width: 100%;
+    background-color: #fff !important;
+}
+
+.toolbar-item {
+    // margin-left: 1rem;
+    margin: .05vw;
+    border-radius: 0.2vw;
+    font-family: Arial, Helvetica, sans-serif;
+    background-size: cover;
+    cursor: pointer;
+    text-align: center;
+    color:$airforce_bluebg_font;
+    background: linear-gradient($airforce_medium_blue, $airforce_darkest_blue);
+    border-width: 0em;
+    
+    min-width: .5vw;
+    min-height: .5vw;
+    line-height: 1.5vw;
+    font-size: 80% !important;
+    font-weight: normal;
+    
+    &:hover {
+      outline: none;
+      color: $airforce_bluebg_font;
+      background: linear-gradient($airforce_medium_blue, $airforce_darkest_blue) !important;
+      background-size: cover !important;
+      border-color: #333 !important;
+      border-width: 0.1em;
+  }
+ 
+}
+  
+mat-toolbar {
+    flex: none;
+    border: 0.1vw solid #333;
+    color: $airforce_bluebg_font !important;
+    background: linear-gradient($airforce_medium_blue, $airforce_darkest_blue) !important;
+}
+  
+mat-tab-group {
+    flex: auto;
+    overflow-y: auto;
+}
+
+
+.product-label {
+    font-weight: bold;
+    font-size: 0.8em;
+}
+  
+////////////////////////////////////////////
+.dialog-mask {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    color: #ffff;
+    opacity: 1;
+    z-index: 99999999;
+}
+  
+.dialog-container {
+    display: flex;
+    flex-direction: column;
+    border-radius: 6px;
+    position: fixed;
+    padding: 3px;
+    
+    .header {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 50px;
+      line-height: 50px;
+      font-size: 100%;
+      background-color: #7e7e7e;
+      color: #111;
+      cursor: pointer;
+    }
+    
+    .footer {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 25px;
+      line-height: 25px;
+      font-size: 80%;
+      background-color: #7e7e7e;
+      color: #111;
+    }
+    
+    .content-container {
+      position: relative;
+      width: 100%;
+      height: calc(100% - 75px);
+    }
+    
+}
+
+.elnot-container {
+    // width: 424px;
+    // width: 100%;
+    // width: 550px;
+    width: 1750px;
+    // height: 252px;
+    // height: 100%;
+    height: 408px;
+    background: white;
+    border: 1px solid #777;
+    border-radius: 6px;
+    display: flex;
+    flex-direction:column;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    overflow: hidden;
+}
+  
+.elnot-item {
+    width: 66px;
+    height: 30px;
+    line-height: 30px;
+    margin: 2px;
+    border-radius: 0.2vw;
+    font-family: Arial, Helvetica, sans-serif;
+    background-size: cover;
+    cursor: pointer;
+    text-align: center;
+    overflow: hidden;
+    border: 0.05vw solid #999;
+    color: #333;
+    background: linear-gradient(#eeeeee, #d8d8d8);
+  
+    &:focus {
+        outline: none;
+        color: #fff;
+        background: linear-gradient(#999, #444);
+        background-size: cover;
+        border-color: #555;
+    }
+  
+    &:hover {
+        outline: none;
+        color: #fff;
+        background: linear-gradient(#999, #444);
+        background-size: cover;
+        border-color: #555;
+    }
+  
+    &:active {
+        outline: none;
+        color: #fff;
+        background: linear-gradient(#424242, #111);
+        background-size: cover;
+        border-color: #555;
+    }
+}
+  
+.elnot-selected {
+    outline: none;
+    color: #fff;
+    background: linear-gradient(#075c94, #034571);
+    background-size: cover;
+    border-color: #0c639c;
+}
+
+
+textarea {
+    width: 100%;
+    min-width: 100px;
+    margin: .5px;
+    border: 1px solid #CCCCCC;
+    border-radius: 3px;
+
+    &:focus {
+        outline: none;
+        border-color: #0c639c;
+        box-shadow: 0 0 10px #66AFE9;
+    }
+
+    &:hover {
+        outline: none;
+        border-color: #0c639c;
+    }
+
+    &:disabled {
+        cursor: not-allowed;
+    }
+
+    &::-webkit-input-placeholder { /* Chrome/Opera/Safari */
+      color: #ababab;
+    }
+    &::-moz-placeholder { /* Firefox 19+ */
+      color: #ababab;
+    }
+    &:-ms-input-placeholder { /* IE 10+ */
+      color: #ababab;
+    }
+    &:-moz-placeholder { /* Firefox 18- */
+      color: #ababab;
+    }
+
+}
+
+
+
+.multi-data-selection-container {
+    width: 100%;
+    height: 75px;
+    background: white;
+    border: 1px solid #CCCCCC;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    
+    &:focus {
+        outline: none !important;
+        border-color: #0c639c !important;
+        box-shadow: 0 0 10px #66AFE9 !important;
+    }
+
+    &:hover {
+        outline: none !important;
+        border-color: #0c639c !important;
+    }
+
+}
+  
+.multi-data-selection-item {
+    // width: 120px;
+    height: 35px;
+    line-height: 32px;
+    margin: 2px;
+    border-radius: 0.2vw;
+    background-size: cover;
+    border: 0.1vw solid $airforce_gold_line;
+    color: $airforce_goldbg_font;
+    background: linear-gradient($airforce_gold, $airforce_dark_gold);
+  
+    span {
+        margin-left: 2px;
+        margin-right: 2px;
+        margin-top: auto;
+        margin-bottom: auto;
+        text-align: center;
+        overflow: hidden;
+    }
+    
+    a {
+        margin: 2px;
+        height: 22px;
+        line-height: 22px;
+        cursor: pointer;
+        font-variant: small-caps;
+        padding: 2px;
+        background-color: #dfc875;
+        color: #b3942b;
+        border: solid #b3942b 1px;
+        border-radius: 5px;
+        float: right;
+    }
+    
+}
+
+table {
+    width: 100%;
+    padding: 0;
+    border-collapse: collapse;
+  
+    thead {
+        font-size: 85%;
+        font-weight: 100 !important;
+        background-color: #e8e8e8;
+        color: #595959;
+        padding: 0;
+        margin: 0;
+        // cursor: pointer;
+        
+        th {
+            padding: 5px;
+            text-align: left;
+        }
+  
+    }
+  
+    tbody {
+        font-size: 85%;
+        color: #222;
+        background-color: #fff;
+        font-size: 110%;
+  
+        tr {
+            cursor: pointer;
+        
+            a {
+                cursor: pointer !important;
+            }
+            
+            &:hover {
+                background-color: #777;
+                color: #fff;
+            }
+  
+        }
+  
+        td {
+            // cursor: pointer;
+            padding: 5px;
+            vertical-align: top;
+        }
+  
+    }
+  }
+
+tfoot {
+    td {
+        padding-top: 10px;
+    }
+}
+
+.hdrCell {
+    padding: 5px;
+    text-align: left;
+    
+    span {
+        cursor: pointer;
+    }
+}
+
+pag-display {
+    font-family: 'Lucida Sans Unicode', Arial, Helvetica, sans-serif;
+    color: #333 !important;
+    -webkit-border-radius: 4px !important;
+    -moz-border-radius: 4px !important;
+    -ms-border-radius: 4px !important;
+    border-radius: 4px !important;
+    border: 0.1vw solid #666;
+    margin: 5px;
+    font-size: 0.85em;
+    text-align: center;
+    min-width: 15vw;
+    height: 20px;
+    padding-top: 0.25vw;
+    padding-left: 0.55vw;
+    padding-right: 0.55vw;
+    font-weight: bold;
+    display: inline;
+}

@@ -1,0 +1,217 @@
+
+label {
+    font-size: 85%;
+}
+
+.selection-control {
+    color: #222 !important;
+}
+
+.elnot-selection-row {
+    height: 25px;
+    // border: solid 1px #ff0000;
+}
+
+.elnot-container-row {
+    height:-webkit-calc(100% - 75px);
+    height:-moz-calc(100% - 75px);
+    height:calc(100% - 75px);
+    // border: solid 1px #ff0000;
+}
+
+.elnot-container {
+    width: 100%;
+    height: 508px !important;
+    background: white;
+    border: 1px solid #777;
+    border-radius: 6px;
+    display: flex;
+    flex-flow: column wrap;
+    align-content: flex-start;
+    overflow: hidden;
+}
+
+.elnot-item {
+    width: 100px;
+    height: 30px;
+    line-height: 30px;
+    margin: 2px;
+    border-radius: 0.2vw;
+    font-family: Arial, Helvetica, sans-serif;
+    background-size: cover;
+    cursor: pointer;
+    text-align: center;
+    overflow: hidden;
+    border: 0.05vw solid #999;
+    color: #333;
+    background: linear-gradient(#eeeeee, #d8d8d8);
+ 
+    &:focus {
+        outline: none;
+        color: #fff;
+        background: linear-gradient(#999, #444);
+        background-size: cover;
+        border-color: #555;
+    }
+
+    &:hover {
+        outline: none;
+        color: #fff;
+        background: linear-gradient(#999, #444);
+        background-size: cover;
+        border-color: #555;
+    }
+
+    &:active {
+        outline: none;
+        color: #fff;
+        background: linear-gradient(#424242, #111);
+        background-size: cover;
+        border-color: #555;
+    }
+}
+
+.elnot-selected {
+    outline: none;
+    color: #fff;
+    background: linear-gradient(#075c94, #034571);
+    background-size: cover;
+    border-color: #0c639c;
+}
+
+.elnot-prev-selected {
+    height: 32px !important;
+    box-shadow: inset 0px 0px 0px 2px #5bb6f2;
+    box-sizing: border-box;
+}
+
+.lcd-elnot-selected {
+    outline: none;
+    color: #fff;
+    background: linear-gradient(#218926, #1d7821);
+    background-size: cover;
+    border-color: #269f2d;
+}
+
+.lcd-elnot-deselected {
+    height: 32px !important;
+    box-shadow: inset 0px 0px 0px 2px #1d7821;
+    box-sizing: border-box;
+}
+
+.hist-elnot-selected {
+    outline: none;
+    color: #fff;
+    background: linear-gradient(#444, #222);
+    background-size: cover;
+    border-color: #777;
+}
+
+.hist-elnot-deselected {
+    height: 32px !important;
+    box-shadow: inset 0px 0px 0px 2px #222;
+    box-sizing: border-box;
+}
+
+.fill-space {
+    // This fills the remaining space, by using flexbox.
+    // Every toolbar row uses a flexbox row layout.
+    flex: 1 1 auto;
+}
+
+
+$panel-dropshadow: -4px 4px 15px 3px rgba(187,187,187,.5);
+
+@mixin drop-shadow($dropshadow)
+{
+    -moz-box-shadow: $dropshadow;
+	-webkit-box-shadow: $dropshadow;
+	box-shadow: $dropshadow;
+}
+
+.elnot-information-panel {
+    @include drop-shadow($panel-dropshadow);
+    width: 350px;
+    height: 525px;
+    margin-left: 5px !important;
+    // margin-right: auto !important;
+    border: #e2e2e2 solid 1px;
+    // background-color: rgba(240, 240, 240, 0.75);
+    border-radius: 4px;
+    padding: 2px;
+    color: #111;
+    
+    .content {
+        width: calc(100% - 4px);
+        height: calc(100% - 4px);
+        border: solid 2px rgba(243, 192, 85, 0.5);
+        border-radius: 4px;
+    }
+    
+    label {
+        font-size: 80%;
+        font-weight: bold;
+    }
+    
+    input {
+        width: calc(100% - 3px);
+        min-width: 50px;
+        height: 20px;
+        margin: 1.5px;
+        border: 1px solid #cccccc;
+        border-radius: 3px;
+        background-color: #4444;
+        color: #111;
+    }
+    
+    select {
+        width: calc(100% - 3px);
+        min-width: 50px;
+        margin: 1.5px;
+        border: 1px solid #cccccc;
+        border-radius: 3px;
+        background-color: #4444;
+        color: #111;
+    }
+    
+}
+
+.emitter-info-list {
+    height: 200px;
+    overflow: auto;
+}
+
+
+.selection-buttons-container {
+    margin-top: 150px !important;
+    padding-left: 15px !important;
+    min-width: 55px !important;
+}
+
+.selection-navigation-button {
+    width: 25px !important;
+    height: 90px !important;
+    line-height: 90px !important;
+}
+
+.progress-panel {
+    @include drop-shadow($panel-dropshadow);
+    
+    background-color: #fff;
+    padding-left: 2px;
+    padding-right: 2px;
+    padding-top: 2px;
+    padding-bottom: 10px;
+    width: 350px;
+    height: 90px;
+    border-radius: 6px;
+    // position: absolute;
+    // top: 5px;
+    // left: 5px;
+}
+
+.progress-label {
+    font-size: 80%;
+    color: #555;
+    text-align: center;
+}

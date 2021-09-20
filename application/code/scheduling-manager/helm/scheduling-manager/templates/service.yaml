@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "scheduling-manager.fullname" . }}
+  labels:
+    app: {{ template "scheduling-manager.name" . }}
+    chart: {{ template "scheduling-manager.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    version: {{ .Values.image.tag }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.port }}
+      protocol: TCP
+      name: http
+  selector:
+    app: {{ template "scheduling-manager.name" . }}
+    release: {{ .Release.Name }}

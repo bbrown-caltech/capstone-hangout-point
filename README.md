@@ -34,7 +34,7 @@ The below implementation was chosen for simplicity and portability, and enables 
 
 | Tool             | Version   | Purpose                                 |
 |------------------|-----------|-----------------------------------------|
-| kind | v0.10.0 | Tool for running local Kubernetes clusters using Docker container “nodes”. |
+| kind | v0.12.0 | Tool for running local Kubernetes clusters using Docker container “nodes”. |
 | Kubernetes | v1.21 | Container orchestration system serving as our deployment environment. |
 | Helm | v3.* | Kubernetes deployment tool for automating creation, packaging, configuration, and deployment of applications and services to Kubernetes clusters |
 | MetalLB | v0.10.2 | Software based Kubernetes load balancer which provides ingress into our cluster. |
