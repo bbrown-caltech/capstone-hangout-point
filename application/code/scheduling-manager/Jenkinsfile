@@ -16,6 +16,8 @@ pipeline {
 
         HELM_REPOSITORY = "https://nexus.brianbrown.me/repository/helm/"
         HELM_IMAGE = 'docker.brianbrown.me/tools/debian-11/helm:3.7.0'
+		
+		UNIT_TEST_IMAGE = 'ubuntu:latest'
 
         DOCKER_IMAGE = ''
         IMAGE_TAG = ''
@@ -27,10 +29,29 @@ pipeline {
 		/**************************************************************
 		 *	RUN ALWAYS
 		 **************************************************************/
-		stage('Run Unit Tests') {
+		stage('Preparing to Run Unit Tests') {
 			steps {
 				script {
-					sh "echo \"Running unit tests...\""
+					
+                    docker.image(UNIT_TEST_IMAGE).inside("--entrypoint=") {
+						
+						stage('Install Dependencies') {
+							sh "apt update -y"
+                            sh "apt install -y curl git"
+                            sh "curl -sL https://deb.nodesource.com/setup_14.x | bash -"
+                            sh "apt update"
+                            sh "apt install -y nodejs"
+						}
+						
+						stage('Running Tests') {
+						    sh "mkdir /source"
+							sh "git -C /source clone -b ${BRANCH_NAME} ${REPOSITORY}"
+                            sh "npm --prefix /source/capstone-hangout-point/application/code/scheduling-manager install"
+                            sh "npm --prefix /source/capstone-hangout-point/application/code/scheduling-manager test"
+						}
+						
+					}
+						
 				}
 			}
 		}
@@ -65,6 +86,9 @@ pipeline {
 		 *	RUN ONLY AFTER MERGE INTO DEVELOP MAIN OR RELEASE TAGGED
 		 **************************************************************/
         stage('Prepare to Build Helm Chart') {
+            when {
+                expression { BRANCH_NAME ==~ /(develop|main|^(\d+\.\d+\.\d+))/ }
+            }
             steps {
                 script {
                     def YAML_FILE="/source/capstone-hangout-point/application/code/scheduling-manager/helm/scheduling-manager/Chart.yaml"
