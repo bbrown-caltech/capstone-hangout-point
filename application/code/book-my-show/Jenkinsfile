@@ -3,9 +3,6 @@ pipeline {
     agent {
         label 'caltech'
     }
-    tools {
-        nodejs "node"
-    }
     environment {
         APPLICATION_NAME = "book-my-show"
         REPOSITORY="https://github.com/bbrown-caltech/capstone-hangout-point.git"
