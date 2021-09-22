@@ -28,7 +28,7 @@ ARG BRANCH
 WORKDIR /source
 RUN mkdir -p /source/book-my-show
 RUN git clone -b ${BRANCH} https://github.com/bbrown-caltech/capstone-hangout-point.git
-RUN mv -R /source/capstone-hangout-point/application/code/book-my-show /source/book-my-show
+RUN mv /source/capstone-hangout-point/application/code/book-my-show/* /source/book-my-show/
 
 
 ######################################################################################################################################
