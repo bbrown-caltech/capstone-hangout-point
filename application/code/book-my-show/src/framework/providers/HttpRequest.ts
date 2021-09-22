@@ -9,18 +9,23 @@ interface HttpRequestConfig {
     results?: any;
 }
 
-class HttpParams {
+interface IHttpParams {
+    set(key: string, value: string): void;
+    toQueryParamString(): string;
+}
+
+class HttpParams implements IHttpParams {
     private params: KeyValuePair[];
     
     constructor() {
         this.params = new Array<KeyValuePair>();
     }
     
-    set(key: string, value: string) {
+    set(key: string, value: string): void {
         this.params.push({ Key: key, Value: value});
     }
     
-    toQueryParamString() {
+    toQueryParamString(): string {
         let queryParamString: string = '?';
         
         for (let i: number = 0; i < this.params.length; i++) {
@@ -33,7 +38,15 @@ class HttpParams {
     
 }
 
-class HttpRequest {
+interface IHttpRequest {
+    loadFile(fileName: string): AsyncTask<string>;
+    get<T>(endpoint: string): AsyncTask<T>;
+    post<T>(endpoint: string, body: string): AsyncTask<T>;
+    put<T>(endpoint: string, body: string): AsyncTask<T>;
+    configFileValid(): boolean;
+}
+
+class HttpRequest implements IHttpRequest {
     
     constructor(public config: HttpRequestConfig) {}
     
@@ -224,4 +237,4 @@ class HttpRequest {
 
 }
 
-export { HttpRequest, HttpRequestConfig, HttpParams };
+export { IHttpRequest, HttpRequest, HttpRequestConfig, IHttpParams, HttpParams };

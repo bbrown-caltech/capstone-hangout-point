@@ -1,1 +1,3 @@
-require('isomorphic-fetch');
+const fetch = require('isomorphic-fetch');
+
+module.exports=fetch;

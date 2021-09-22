@@ -1,0 +1,28 @@
+{
+  "lines": 20,
+  "statements": 20,
+  "functions": 20,
+  "branches": 10,
+  "cache": false,
+  "check-coverage": true,
+  "extension": [
+    ".ts"
+  ],
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "coverage/**",
+    "node_modules/**",
+    "**/*.d.ts",
+    "**/*.test.ts"
+  ],
+  "sourceMap": true,
+  "reporter": [
+    "html",
+    "text",
+    "text-summary"
+  ],
+  "all": true,
+  "instrument": true
+}

@@ -5,7 +5,6 @@ interface ApplicationConfig {
     Environment: string;
     Token: string;
     CurrentUser: any;
-    totalPolicyDays: number;
 }
 
 export { ApplicationConfig };
