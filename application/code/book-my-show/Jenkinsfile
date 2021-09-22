@@ -68,7 +68,7 @@ pipeline {
                    if ((BRANCH_NAME ==~/(main)/)) {
                        IMAGE_TAG = "latest";
                    }
-                   DOCKER_IMAGE = docker.build("${IMAGE_NAME}", "--no-cache -f ./${DOCKERFILE_PATH} ./${GIT_CODE_PATH}/")
+                   DOCKER_IMAGE = docker.build("${IMAGE_NAME}", "--no-cache -f ./${DOCKERFILE_PATH} --build-arg ENVIRONMENT=remote --build-arg BRANCH=${BRANCH_NAME} ./${GIT_CODE_PATH}/")
                }
             }
         }
