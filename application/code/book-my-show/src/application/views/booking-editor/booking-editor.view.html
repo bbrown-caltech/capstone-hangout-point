@@ -1,0 +1,83 @@
+
+<!-- 
+    View Content
+ -->
+ <div class="div-row margin-top-50">
+    <div class="div-col-10">
+        
+        <div class="booking-panel">
+            
+            <div class="div-row">
+                <div class="div-col-10">
+                    <label for="customerName">Customer Name:</label>
+                    <input id="customerName" class="frm-ctl-elemt" type="text" />
+                </div>
+            </div>
+            
+            
+            <div class="div-row">
+                <div class="div-col-10">
+                    <label for="showName">Show Name:</label>
+                    <input id="showName" class="frm-ctl-elemt" type="text" />
+                </div>
+            </div>
+            
+            
+            <div class="div-row">
+                <div class="div-col-05">
+                    <label for="showDate">Show Date:</label>
+                    <input id="showDate" class="frm-ctl-elemt" type="text" />
+                </div>
+                <div class="div-col-01">&nbsp;</div>
+                <div class="div-col-04">
+                    <label for="totalTickets">Total Tickets:</label>
+                    <input id="totalTickets" class="frm-ctl-elemt" type="number" />
+                </div>
+            </div>
+            
+            
+            <div class="div-row">
+                <div class="div-col-10">
+                    <button class="btn btn-small btn-caution float-right" click="resetBooking()">Reset</button>
+                    <button class="btn btn-small btn-crisp float-right" click="addBooking()">Save</button>
+                </div>
+            </div>
+            
+            
+            <div class="div-row">
+                <div class="div-col-10">&nbsp;</div>
+            </div>
+            
+            
+            <div class="div-row">
+                <div class="div-col-10">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="hdrCell">Customer Name</th>
+                                <th class="hdrCell">Show Name</th>
+                                <th class="hdrCell">Show Date</th>
+                                <th class="hdrCell">Total Tickets</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr id="recentBookings">
+                                <td>{{customerName}}</td>
+                                <td>{{showName}}</td>
+                                <td>{{showDate}}</td>
+                                <td>{{totalTickets}}</td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td id="paginator" colspan="4"></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+            
+        </div>
+        
+    </div>
+</div>

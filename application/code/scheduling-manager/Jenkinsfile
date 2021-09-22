@@ -46,8 +46,8 @@ pipeline {
 						stage('Running Tests') {
 						    sh "mkdir /source"
 							sh "git -C /source clone -b ${BRANCH_NAME} ${REPOSITORY}"
-                            sh "npm --prefix /source/capstone-hangout-point/application/code/scheduling-manager install"
-                            sh "npm --prefix /source/capstone-hangout-point/application/code/scheduling-manager test"
+                            sh "npm --prefix /source/capstone-hangout-point/application/code/${APPLICATION_NAME} install"
+                            sh "npm --prefix /source/capstone-hangout-point/application/code/${APPLICATION_NAME} test"
 						}
 						
 					}
@@ -91,9 +91,9 @@ pipeline {
             }
             steps {
                 script {
-                    def YAML_FILE="/source/capstone-hangout-point/application/code/scheduling-manager/helm/scheduling-manager/Chart.yaml"
-                    def CHART_PATH="/source/capstone-hangout-point/application/code/scheduling-manager/helm/scheduling-manager"
-                    def CHART_PARENT_PATH="/source/capstone-hangout-point/application/code/scheduling-manager/helm"
+                    def YAML_FILE="/source/capstone-hangout-point/application/code/${APPLICATION_NAME}/helm/${APPLICATION_NAME}/Chart.yaml"
+                    def CHART_PATH="/source/capstone-hangout-point/application/code/${APPLICATION_NAME}/helm/${APPLICATION_NAME}"
+                    def CHART_PARENT_PATH="/source/capstone-hangout-point/application/code/${APPLICATION_NAME}/helm"
 
                     docker.withRegistry( "https://${DOCKER_REGISTRY}", "${CREDENTIALS_ID}" ) {
                         docker.image(HELM_IMAGE).pull()

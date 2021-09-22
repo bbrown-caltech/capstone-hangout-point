@@ -21,6 +21,7 @@
       "../src/**/*"
     ],
     "include": [
-      "./**/*.ts"
-, "init.js"    ]
+      "./**/*.ts",
+      "init.js"
+, "booking-service.unit.test.ts"    ]
 }

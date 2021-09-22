@@ -1,1 +1,1 @@
-# NG-SPA - Northrop Grumman SPA Framework
+# Cohort SPA Framework
