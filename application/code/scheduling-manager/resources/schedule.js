@@ -34,7 +34,7 @@ const BookingSchema = new mongoose.Schema({
 /***
  * Connect to Mongo Instance
  */
-const BookingModel = new mongoose.model('booking', BookingSchema, 'booking');
+const BookingModel = new mongoose.model('booking', BookingSchema, 'booking', true);
 
 
 /***
@@ -59,10 +59,7 @@ router.post('/', async function(req, res) {
     await booking.save();
     
     console.log('Returning response...');
-    res.status(201).json({
-        message: 'Booking Created',
-        obj: booking
-    });
+    res.status(201).json(booking);
 });
 
 /***
@@ -114,10 +111,7 @@ router.put('/:bookingId', async function(req, res) {
         await sleep(1000);
     }
     
-    res.status(statusCode).json({
-        message: message,
-        obj: obj
-    });
+    res.status(statusCode).json(obj);
 });
 
 

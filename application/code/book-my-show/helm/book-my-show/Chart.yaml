@@ -1,6 +1,6 @@
 apiVersion: v2
-name: fist
-description: A Helm chart for deploying the fist application into a Kubernetes cluster
+name: book-my-show
+description: A Helm chart for deploying the book-my-show application into a Kubernetes cluster
 
 type: application
 

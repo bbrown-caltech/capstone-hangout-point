@@ -37,11 +37,8 @@ class Paginator {
         const endIndex = (startIndex + self.pageSize) > self.data.length ? self.data.length : (startIndex + self.pageSize);
         const pageData: any[] = self.data.slice(startIndex, endIndex);
         
-        console.log('Pagination Setting Data: ', self.data);
-        
         if (self.paged)
         {
-            console.log('Paging data...');
             self.paged(pageData);
         }
 

@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: fist-config
-  namespace: fist
+  name: book-my-show-config
+  namespace: {{ .Values.configuration.namespace }}
   labels:
-    name: fist-config
+    name: book-my-show-config
     type: local
 {{- with .Values.configuration }}
 data:

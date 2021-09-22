@@ -7,246 +7,124 @@ pipeline {
         nodejs "node"
     }
     environment {
-        PROJECT_NAME = 'fist'
-        DOCKER_REGISTRY = 'docker-fmswf.di2e.net'
-        DOCKER_VERSION = 'v2'
-        PROJECT_VERSION = '0.1.0'
-        GIT_SSH_URI = 'ssh://git@bitbucket.di2e.net:7999/fmswf/fist.git'
-        REPO_NAME = 'fist'
-        IMAGE_NAME = "fms-intelligence-support-tool"
-        IMAGE_SUBDIRECTORY = 'fmswf-applications'
-        DOCKER_CREDENTIALS_ID = 'fmswf-docker'
-        DOCKERFILE_NAME = "Dockerfile"
+        APPLICATION_NAME = "book-my-show"
+        REPOSITORY="https://github.com/bbrown-caltech/capstone-hangout-point.git"
+        GIT_CODE_PATH = "application/code/book-my-show"
+
+        DOCKER_REGISTRY = 'docker.brianbrown.me'
+        CREDENTIALS_ID = 'caltech'
+        IMAGE_NAME = "docker.brianbrown.me/book-my-show"
+        DOCKERFILE_PATH = "application/code/book-my-show/Dockerfile"
+
+        HELM_REPOSITORY = "https://nexus.brianbrown.me/repository/helm/"
+        HELM_IMAGE = 'docker.brianbrown.me/tools/debian-11/helm:3.7.0'
+		
+		UNIT_TEST_IMAGE = 'ubuntu:latest'
+
         DOCKER_IMAGE = ''
         IMAGE_TAG = ''
-        DEVELOPER_EMAILS = 'Brian.Brown@ngc.com,George.Beavers@ngc.com,Tyler.Maas@ngc.com'
-        HELM_PACKAGE_DIRECTORY = 'target/helm'
-        CLAIR_REPORTS_DIRECTORY = 'target/clair-reports'
-        SONAR_SOURCES = '.'
-        SONAR_EXCLUSIONS = 'node_modules/**'
-        NPM_LOG_LEVEL = 'verbose'
-        NODE_DOCKER_IMAGE = 'docker-hub.di2e.net/node:14-alpine'
+        CHART_VERSION = ''
+        CHART_FILE_NAME = ''
+        HELM_REPO_URL = ''
     }
 
     stages {
-        stage('Prepare Build Environment') {
-            steps {
-                script {
-                    configFileProvider([configFile(fileId: 'npm-config', targetLocation: '.npmrc')]) {
-                        docker.withRegistry("https://docker-hub.di2e.net", "${DOCKER_CREDENTIALS_ID}") {
-                            docker.image(NODE_DOCKER_IMAGE).pull()
-
-                            docker.image(NODE_DOCKER_IMAGE).inside {
-                                stage('Install Dependencies') {
-                                    sh 'node --version'
-                                    sh 'npm --version'
-                                    sh "npm ci --cache ${WORKSPACE}/.npm-cache --loglevel ${NPM_LOG_LEVEL}"
-                                }
-
-                                if (!(BRANCH_NAME ==~/(master|develop|^(\d+\.\d+\.\d+))/)) {
-                                    stage('Build App') {
-                                        sh 'npm build'
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        stage('SonarQube Scan') {
-            when {
-                anyOf {
-                    branch "master"
-                    branch "develop"
-                }
-            }
-            steps {
-                script {
-                    def sonarScanner = tool name: 'SonarQube Scanner', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
-                    def sonarJdk = tool name: 'OpenJDK 11 (Latest)', type: 'jdk'
-                    def npm = tool name: 'NodeJS 12', type: 'nodejs'
-
-                    withEnv(["PATH+JDK=${sonarJdk}/bin", "PATH+NODE=${npm}/bin"]) {
-                        withSonarQubeEnv('Sonarqube Di2e Server') {
-                            sh "${sonarScanner}/bin/sonar-scanner -Dsonar.projectKey=FMSWF-FIST-${BRANCH_NAME.capitalize()} -Dsonar.sources=${SONAR_SOURCES} -Dsonar.exclusions=${SONAR_EXCLUSIONS}"
-                        }
-                    }
-                }
-            }
-        }
-
+		/**************************************************************
+		 *	RUN ALWAYS
+		 **************************************************************/
+		stage('Preparing to Run Unit Tests') {
+			steps {
+				script {
+					
+                    docker.image(UNIT_TEST_IMAGE).inside("--entrypoint=") {
+						
+						stage('Install Dependencies') {
+							sh "apt update -y"
+                            sh "apt install -y curl git"
+                            sh "curl -sL https://deb.nodesource.com/setup_14.x | bash -"
+                            sh "apt update"
+                            sh "apt install -y nodejs"
+						}
+						
+						stage('Running Tests') {
+						    sh "mkdir /source"
+							sh "git -C /source clone -b ${BRANCH_NAME} ${REPOSITORY}"
+                            sh "npm --prefix /source/capstone-hangout-point/application/code/${APPLICATION_NAME} install"
+                            sh "npm --prefix /source/capstone-hangout-point/application/code/${APPLICATION_NAME} run coverage"
+						}
+						
+					}
+						
+				}
+			}
+		}
         stage('Build Docker Image') {
             steps {
+               script {
+                   //   Development Testing/Deployment
+                   IMAGE_TAG = "develop";
+                   //   Production Deployment
+                   if ((BRANCH_NAME ==~/^(\d+\.\d+\.\d+)/)) {
+                       IMAGE_TAG = BRANCH_NAME;
+                   }
+                   //   UAT Deployment
+                   if ((BRANCH_NAME ==~/(main)/)) {
+                       IMAGE_TAG = "latest";
+                   }
+                   DOCKER_IMAGE = docker.build("${IMAGE_NAME}", "--no-cache -f ./${DOCKERFILE_PATH} ./${GIT_CODE_PATH}/")
+               }
+            }
+        }
+        stage('Push Docker Image') {
+            steps {
                 script {
-                    docker.withRegistry( "https://${DOCKER_REGISTRY}/${DOCKER_VERSION}/", "${DOCKER_CREDENTIALS_ID}" ) {
-                        //   Feature Branch
-                        IMAGE_TAG = "latest";
-                        //   Production Deployment
-                        if ((BRANCH_NAME ==~/^(\d+\.\d+\.\d+)/)) {
-                            IMAGE_TAG = BRANCH_NAME;
-                        }
-                        //   Development Testing/Deployment
-                        if ((BRANCH_NAME ==~/(develop)/)) {
-                            IMAGE_TAG = "develop";
-                        }
-                        //   UAT Deployment
-                        if ((BRANCH_NAME ==~/(main|master)/)) {
-                            IMAGE_TAG = "uat";
-                        }
-                        DOCKER_IMAGE = docker.build("${DOCKER_REGISTRY}/${IMAGE_SUBDIRECTORY}/${IMAGE_NAME}:${IMAGE_TAG}", "-f ./${DOCKERFILE_NAME} --build-arg BRANCH=${BRANCH_NAME} .")
+                    docker.withRegistry( "https://${DOCKER_REGISTRY}", "${CREDENTIALS_ID}" ) {
+                        DOCKER_IMAGE.push("$IMAGE_TAG")
                     }
                 }
             }
         }
 
-        stage('Package Helm chart') {
+		/**************************************************************
+		 *	RUN ONLY AFTER MERGE INTO DEVELOP MAIN OR RELEASE TAGGED
+		 **************************************************************/
+        stage('Prepare to Build Helm Chart') {
             when {
-                expression { BRANCH_NAME ==~ /(master|develop|^(\d+\.\d+\.\d+))/ }
+                expression { BRANCH_NAME ==~ /(develop|main|^(\d+\.\d+\.\d+))/ }
             }
             steps {
                 script {
-                    def outputDirectory = "${HELM_PACKAGE_DIRECTORY}/${REPO_NAME}"
+                    def YAML_FILE="/source/capstone-hangout-point/application/code/${APPLICATION_NAME}/helm/${APPLICATION_NAME}/Chart.yaml"
+                    def CHART_PATH="/source/capstone-hangout-point/application/code/${APPLICATION_NAME}/helm/${APPLICATION_NAME}"
+                    def CHART_PARENT_PATH="/source/capstone-hangout-point/application/code/${APPLICATION_NAME}/helm"
 
-                    def chartVersion = "${PROJECT_VERSION}";
-                    def appVersion = ''
-                    def chartVersionFlag = (''.equals(chartVersion) || (chartVersion == null)) ? '' : "--version ${chartVersion}"
-                    def appVersionFlag = (''.equals(appVersion) || (appVersion == null)) ? '' : "--app-version ${appVersion}"
-
-                    sh """
-                        helm package "helm/${REPO_NAME}" -d ${outputDirectory} ${chartVersionFlag} ${appVersionFlag}
-                    """
-
-                    archiveArtifacts artifacts: "${outputDirectory}/**/*.tgz", fingerprint: true
-                }
-            }
-        }
-
-        stage('Clair Scan') {
-            when {
-                expression { BRANCH_NAME ==~ /(master|develop|^(\d+\.\d+\.\d+))/ }
-            }
-            steps {
-                script {
-                    try {
-                        def image = "${DOCKER_REGISTRY}/${IMAGE_SUBDIRECTORY}/${IMAGE_NAME}:${IMAGE_TAG}"
-                        def reportDirectory = "${CLAIR_REPORTS_DIRECTORY}/${REPO_NAME}"
-
-                        def dockerCompose = readFile 'clair/docker-compose.yml'
-                        // Write the Compose file for Clair to the workspace
-                        dir('.clair') {
-                            writeFile file: 'docker-compose.yml', text: dockerCompose
-
-                            // Start Clair services in Docker
-                            withDockerRegistry([url: "https://docker-hub.di2e.net", credentialsId: "${DOCKER_CREDENTIALS_ID}"]) {
-                                sh """
-                                    docker rm -f clair-scanner-$EXECUTOR_NUMBER || true
-                                    docker-compose pull || true
-                                    docker-compose -p fmswf-${BRANCH_NAME} up -d clair
-                                    sleep 5s
-                                """
-                            }
-                        }
-                        def failsBuild = false
-                        def clairResult
-
-                        // Scan
-                        dir('.clair') {
-                            clairResult = sh (
-                                label: 'clair-compose',
-                                returnStatus: true,
-                                script: "docker-compose -p fmswf-${BRANCH_NAME} run --name clair-scanner-$EXECUTOR_NUMBER scanner --clair=\"http://clair:6060\" --ip=\"clair-scanner-$EXECUTOR_NUMBER\" --log=clair.log --report=report.json ${image}"
-                            )
-                        }
-
-                        dir(reportDirectory) {
-                            sh '''
-                                docker container cp clair-scanner-$EXECUTOR_NUMBER:clair.log clair.log
-                                docker container cp clair-scanner-$EXECUTOR_NUMBER:report.json report.json
-                                docker rm -f clair-scanner-$EXECUTOR_NUMBER || true
-                            '''
-                        }
-
-                        // Extract reports to reportDirectory
-                        archiveArtifacts artifacts: "${reportDirectory}/**/clair.log, ${reportDirectory}/**/report.json", fingerprint: true
-
-                        if ((clairResult != 0) && failsBuild) {
-                            error "Clair scan contained findings or failed"
-                        }
-                    } catch(e) {
-                        throw e
-                    } finally {
-                        dir('.clair') {
-                            sh 'docker-compose -p fmswf-${BRANCH_NAME} down --rmi all -v || true'
-                        }
-                     }
-                }
-            }
-        }
-
-        stage('Deploy Artifacts') {
-            when {
-                expression { BRANCH_NAME ==~ /(master|develop|^(\d+\.\d+\.\d+))/ }
-            }
-            parallel {
-                stage('Push Docker Image') {
-                    steps {
-                        script {
-                            docker.withRegistry( "https://${DOCKER_REGISTRY}/${DOCKER_VERSION}/", "${DOCKER_CREDENTIALS_ID}" ) {
-                                DOCKER_IMAGE.push("$IMAGE_TAG")
-                            }
-                        }
-                    }
-                }
-                stage('Upload Helm chart') {
-                    steps {
-                        script {
-                            def snapshotPackages = findFiles(glob: "${HELM_PACKAGE_DIRECTORY}/**/*-SNAPSHOT.tgz")
-                            def releasePackages = findFiles(glob: "${HELM_PACKAGE_DIRECTORY}/**/*.tgz", excludes: "${HELM_PACKAGE_DIRECTORY}/**/*-SNAPSHOT.tgz")
-                            def baseUri = "https://nexus.di2e.net/nexus3/repository/Private_FMSWF_Raw/helm-charts/"
-
-                            withCredentials([usernameColonPassword(credentialsId: "${DOCKER_CREDENTIALS_ID}", variable: 'USERPASS')]) {
-                                snapshotPackages.each {
-                                    sh 'curl --silent --fail --show-error --user "$USERPASS"' + " --upload-file ${it.toString()} ${baseUri}snapshot/"
-                                }
-                                releasePackages.each {
-                                    sh 'curl --silent --fail --show-error --user "$USERPASS"' + " --upload-file ${it.toString()} ${baseUri}release/"
-                                }
-                            }
-                        }
-                    }
-                }
-                stage('Create and Push Tarball') {
-                    steps {
-                        script {
-                            def primaryImage = "${DOCKER_REGISTRY}/${IMAGE_SUBDIRECTORY}/${IMAGE_NAME}:${IMAGE_TAG}"
-                            def developImage = (BRANCH_NAME == 'develop') ? "${DOCKER_REGISTRY}/${IMAGE_SUBDIRECTORY}/${IMAGE_NAME}:develop" : ''
-
-                            withCredentials([usernameColonPassword(credentialsId: "${DOCKER_CREDENTIALS_ID}", variable: 'USERPASS')]) {
-                                sh "docker save ${primaryImage} ${developImage} | gzip > ${PROJECT_NAME}.tar.gz"
-                                sh 'curl --silent --fail --show-error --user "$USERPASS"' + " --upload-file ${PROJECT_NAME}.tar.gz https://nexus.di2e.net/nexus3/repository/Private_FMSWF_Raw/applications/fist/${IMAGE_TAG}/${PROJECT_NAME}.tar.gz"
-                                sh 'curl --silent --fail --show-error --user "$USERPASS"' + " --upload-file ${CLAIR_REPORTS_DIRECTORY}/${PROJECT_NAME}/report.json https://nexus.di2e.net/nexus3/repository/Private_FMSWF_Raw/applications/fist/${IMAGE_TAG}/clair-report.json"
-                                sh 'curl --silent --fail --show-error --user "$USERPASS"' + " --upload-file ${CLAIR_REPORTS_DIRECTORY}/${PROJECT_NAME}/clair.log https://nexus.di2e.net/nexus3/repository/Private_FMSWF_Raw/applications/fist/${IMAGE_TAG}/clair-log.log"
-                            }
-                        }
+                    docker.withRegistry( "https://${DOCKER_REGISTRY}", "${CREDENTIALS_ID}" ) {
+                        docker.image(HELM_IMAGE).pull()
+						
+                        docker.image(HELM_IMAGE).inside("--entrypoint=") {
+							
+							stage('Getting Chart Version') {
+							    def CHART_YAML_FILE="${CHART_PATH}/Chart.yaml"
+								sh "git -C /source clone -b ${BRANCH_NAME} ${REPOSITORY}"
+								CHART_VERSION=sh(script: "python /scripts/yaml_parser.py version ${CHART_YAML_FILE}", returnStdout: true)
+							}
+							
+							stage('Packaging Helm Chart') {
+								sh "helm package ${CHART_PATH} -d ${CHART_PARENT_PATH}"
+								CHART_FILE_NAME="${CHART_PARENT_PATH}/${APPLICATION_NAME}-${CHART_VERSION}.tgz"
+							}
+							
+							stage('Upload Helm Chart') {
+								HELM_REPO_URL="${HELM_REPOSITORY}${APPLICATION_NAME}-${CHART_VERSION}.tgz"
+								sh "curl -k -v -u 'caltech:Password123' --upload-file ${CHART_FILE_NAME} ${HELM_REPO_URL}"
+							}
+							
+						}
+						
                     }
                 }
             }
         }
     }
 
-    post {
-        failure {
-            script {
-                if ( BRANCH_NAME == 'master' || BRANCH_NAME == 'develop') {
-                    emailext subject: "${PROJECT_NAME} Pipeline Failure",
-                        to: "${DEVELOPER_EMAILS}",
-                        body: "<h2>${PROJECT_NAME} Failure</h2>There was an error in the ${PROJECT_NAME}/${NORMALIZED_BRANCH_NAME} pipeline.<br>Please review the build and fix any errors that might be occuring.<br><br>The log for the failed execution is attached to this email.",
-                        mimeType: 'text/html',
-                        attachLog: true
-                }
-            }
-        }
-    }
 }

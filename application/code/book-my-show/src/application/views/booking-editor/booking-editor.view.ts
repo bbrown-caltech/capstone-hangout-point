@@ -94,11 +94,9 @@ class BookingEditor extends ViewModel {
         
         this.bookingEditor.saveBooking(booking)
         .completed((result: Booking) => {
-            console.info('Booking Saved: ', result);
             self.bookings.push(result);
             self.bookingPaginator.setData(self.bookings);
             self.resetBooking();
-            console.info('Bookings Refreshed: ', self.bookings);
         }).exception((error: any) => {
             console.error('Save Booking Exception: ', error);
         });

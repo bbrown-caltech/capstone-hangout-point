@@ -1,30 +1,36 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "fist.fullname" . }}
+  name: {{ include "book-my-show.fullname" . }}
   labels:
-    app: {{ template "fist.name" . }}
-    chart: {{ template "fist.chart" . }}
+    app: {{ template "book-my-show.name" . }}
+    chart: {{ template "book-my-show.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
     version: {{ .Values.image.tag }}
 spec:
+  {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
+  {{- end }}
   selector:
     matchLabels:
-      app: {{ template "fist.name" . }}
+      app: {{ template "book-my-show.name" . }}
       release: {{ .Release.Name }}
   template:
     metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       labels:
-        app: {{ template "fist.name" . }}
+        app: {{ template "book-my-show.name" . }}
         release: {{ .Release.Name }}
     spec:
-    {{- with .Values.imagePullSecrets }}
+      {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
-    {{- end }}
-      serviceAccountName: {{ include "fist.serviceAccountName" . }}
+      {{- end }}
+      serviceAccountName: {{ include "book-my-show.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
@@ -48,21 +54,21 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
-            - name: fistconfig
+            - name: bookmyshowconfig
               mountPath: /dockerrun/config
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-    {{- with .Values.affinity }}
+      {{- with .Values.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
-    {{- end }}
-    {{- with .Values.tolerations }}
+      {{- end }}
+      {{- with .Values.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
-    {{- end }}
+      {{- end }}
       volumes:
-        - name: fistconfig
+        - name: bookmyshowconfig
           configMap:
-            name: fist-config
+            name: book-my-show-config
