@@ -1,0 +1,25 @@
+---
+- name: Update Tomcat Application
+  hosts: "{{ target }}"
+  user: caltech
+  tasks:
+    - name: Create Source Directory
+      command: sh -c 'mkdir -p $HOME/source'
+
+    - name: Ensure Source Directory Empty
+      command: sh -c 'rm -rf $HOME/source/*'
+
+    - name: Get Latest Project Files
+      command: sh -c 'git -C $HOME/source clone -b {{ branch }} https://github.com/bbrown-caltech/capstone-hangout-point.git'
+
+    - name: Stop Running Application
+      command: sh -c 'docker-compose -f $HOME/source/capstone-hangout-point/devops-tools/docker-compose.yml rm -f -s {{ service }}'
+
+    - name: Login to Docker Registry
+      command: sh -c 'docker login {{ registry }} --username {{ uid }} --password {{ pwd }}'
+
+    - name: Get Latest Image
+      command: sh -c 'docker pull {{ image }}:{{ tag }}'
+
+    - name: Start Application
+      command: sh -c 'APPLICATION_VERSION={{ version }} docker-compose -f $HOME/source/capstone-hangout-point/devops-tools/docker-compose.yml up -d {{ service }}'

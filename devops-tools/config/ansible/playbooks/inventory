@@ -1,0 +1,14 @@
+[service_host]
+172.18.0.1 ansible_user=caltech ansible_ssh_pass=caltech
+
+
+[service_host:vars]
+service=scheduling-manager-dev
+registry=docker.brianbrown.me
+image=docker.brianbrown.me/scheduling-manager
+uid=caltech
+pwd=Password123
+tag=develop
+version=0.1.0
+branch=develop
+

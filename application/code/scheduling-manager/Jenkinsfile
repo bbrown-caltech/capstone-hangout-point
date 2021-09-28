@@ -24,11 +24,12 @@ pipeline {
         CHART_VERSION = ''
         CHART_FILE_NAME = ''
         HELM_REPO_URL = ''
+        SERVICE_NAME = ''
     }
     stages {
-		/**************************************************************
+		/**********************************************************************
 		 *	RUN ALWAYS
-		 **************************************************************/
+		 **********************************************************************/
 		stage('Preparing to Run Unit Tests') {
 			steps {
 				script {
@@ -60,9 +61,11 @@ pipeline {
                script {
                    //   Development Testing/Deployment
                    IMAGE_TAG = "develop";
+                   SERVICE_NAME = "${APPLICATION_NAME}-dev";
                    //   Production Deployment
                    if ((BRANCH_NAME ==~/^(\d+\.\d+\.\d+)/)) {
                        IMAGE_TAG = BRANCH_NAME;
+                       SERVICE_NAME = APPLICATION_NAME;
                    }
                    //   UAT Deployment
                    if ((BRANCH_NAME ==~/(main)/)) {
@@ -82,9 +85,9 @@ pipeline {
             }
         }
 		
-		/**************************************************************
-		 *	RUN ONLY AFTER MERGE INTO DEVELOP MAIN OR RELEASE TAGGED
-		 **************************************************************/
+		/**********************************************************************
+		 *	RUN THE BELOW ONLY AFTER MERGE INTO DEVELOP MAIN OR RELEASE TAGGED
+		 **********************************************************************/
         stage('Prepare to Build Helm Chart') {
             when {
                 expression { BRANCH_NAME ==~ /(develop|main|^(\d+\.\d+\.\d+))/ }
@@ -122,6 +125,26 @@ pipeline {
                 }
             }
         }
+        
+        stage('Deploy Application') {
+            when {
+                expression { BRANCH_NAME ==~ /(develop|^(\d+\.\d+\.\d+))/ }
+            }
+            steps {
+                script {
+                    //  Execute Ansible Playbook
+                    sh "docker exec -i ansible ansible-playbook -i /playbooks/inventory /playbooks/update-service.yaml \
+                        -e target=service_host \
+                        -e service=${SERVICE_NAME} \
+                        -e image=${IMAGE_NAME} \
+                        -e tag=${IMAGE_TAG} \
+                        -e version=${CHART_VERSION} \
+                        -e branch=${BRANCH_NAME}"
+                }
+            }
+        }
+        
+
     }
     
 }
