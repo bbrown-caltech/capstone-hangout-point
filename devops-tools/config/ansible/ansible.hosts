@@ -43,5 +43,5 @@
 #db-[99:101]-node.example.com
 
 [caltech]
-tomcat ansible_user=caltech ansible_ssh_pass=caltech
+172.18.0.1 ansible_user=caltech ansible_ssh_pass=caltech
 
