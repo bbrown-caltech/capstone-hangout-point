@@ -1,0 +1,149 @@
+
+pipeline {
+    agent {
+        label 'caltech'
+    }
+    environment {
+        APPLICATION_NAME = "book-my-show"
+        REPOSITORY="https://github.com/bbrown-caltech/capstone-hangout-point.git"
+        GIT_CODE_PATH = "application/code/book-my-show"
+
+        DOCKER_REGISTRY = 'docker.brianbrown.me'
+        CREDENTIALS_ID = 'caltech'
+        IMAGE_NAME = "docker.brianbrown.me/book-my-show"
+        DOCKERFILE_PATH = "application/code/book-my-show/Dockerfile"
+
+        HELM_REPOSITORY = "https://nexus.brianbrown.me/repository/helm/"
+        HELM_IMAGE = 'docker.brianbrown.me/tools/debian-11/helm:3.7.0'
+		
+		UNIT_TEST_IMAGE = 'ubuntu:latest'
+
+        DOCKER_IMAGE = ''
+        IMAGE_TAG = ''
+        CHART_VERSION = ''
+        CHART_FILE_NAME = ''
+        HELM_REPO_URL = ''
+        SERVICE_NAME = ''
+    }
+
+    stages {
+		/**********************************************************************
+		 *	RUN ALWAYS
+		 **********************************************************************/
+		stage('Preparing to Run Unit Tests') {
+			steps {
+				script {
+					
+                    docker.image(UNIT_TEST_IMAGE).inside("--entrypoint=") {
+						
+						stage('Install Dependencies') {
+							sh "apt update -y"
+                            sh "apt install -y curl git"
+                            sh "curl -sL https://deb.nodesource.com/setup_14.x | bash -"
+                            sh "apt update"
+                            sh "apt install -y nodejs"
+						}
+						
+						stage('Running Tests') {
+						    sh "mkdir /source"
+							sh "git -C /source clone -b ${BRANCH_NAME} ${REPOSITORY}"
+                            sh "npm --prefix /source/capstone-hangout-point/application/code/${APPLICATION_NAME} install"
+                            sh "npm --prefix /source/capstone-hangout-point/application/code/${APPLICATION_NAME} run coverage"
+						}
+						
+					}
+						
+				}
+			}
+		}
+        stage('Build Docker Image') {
+            steps {
+               script {
+                   //   Development Testing/Deployment
+                   IMAGE_TAG = "develop";
+                   SERVICE_NAME = "${APPLICATION_NAME}-dev";
+                   //   Production Deployment
+                   if ((BRANCH_NAME ==~/^(\d+\.\d+\.\d+)/)) {
+                       IMAGE_TAG = BRANCH_NAME;
+                       SERVICE_NAME = APPLICATION_NAME;
+                   }
+                   //   UAT Deployment
+                   if ((BRANCH_NAME ==~/(main)/)) {
+                       IMAGE_TAG = "latest";
+                   }
+                   DOCKER_IMAGE = docker.build("${IMAGE_NAME}", "--no-cache -f ./${DOCKERFILE_PATH} --build-arg ENVIRONMENT=remote --build-arg BRANCH=${BRANCH_NAME} ./${GIT_CODE_PATH}/")
+               }
+            }
+        }
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    docker.withRegistry( "https://${DOCKER_REGISTRY}", "${CREDENTIALS_ID}" ) {
+                        DOCKER_IMAGE.push("$IMAGE_TAG")
+                    }
+                }
+            }
+        }
+
+		/**********************************************************************
+		 *	RUN THE BELOW ONLY AFTER MERGE INTO DEVELOP MAIN OR RELEASE TAGGED
+		 **********************************************************************/
+        stage('Prepare to Build Helm Chart') {
+            when {
+                expression { BRANCH_NAME ==~ /(develop|main|^(\d+\.\d+\.\d+))/ }
+            }
+            steps {
+                script {
+                    def YAML_FILE="/source/capstone-hangout-point/application/code/${APPLICATION_NAME}/helm/${APPLICATION_NAME}/Chart.yaml"
+                    def CHART_PATH="/source/capstone-hangout-point/application/code/${APPLICATION_NAME}/helm/${APPLICATION_NAME}"
+                    def CHART_PARENT_PATH="/source/capstone-hangout-point/application/code/${APPLICATION_NAME}/helm"
+
+                    docker.withRegistry( "https://${DOCKER_REGISTRY}", "${CREDENTIALS_ID}" ) {
+                        docker.image(HELM_IMAGE).pull()
+						
+                        docker.image(HELM_IMAGE).inside("--entrypoint=") {
+							
+							stage('Getting Chart Version') {
+							    def CHART_YAML_FILE="${CHART_PATH}/Chart.yaml"
+								sh "git -C /source clone -b ${BRANCH_NAME} ${REPOSITORY}"
+								CHART_VERSION=sh(script: "python /scripts/yaml_parser.py version ${CHART_YAML_FILE}", returnStdout: true)
+							}
+							
+							stage('Packaging Helm Chart') {
+								sh "helm package ${CHART_PATH} -d ${CHART_PARENT_PATH}"
+								CHART_FILE_NAME="${CHART_PARENT_PATH}/${APPLICATION_NAME}-${CHART_VERSION}.tgz"
+							}
+							
+							stage('Upload Helm Chart') {
+								HELM_REPO_URL="${HELM_REPOSITORY}${APPLICATION_NAME}-${CHART_VERSION}.tgz"
+								sh "curl -k -v -u 'caltech:Password123' --upload-file ${CHART_FILE_NAME} ${HELM_REPO_URL}"
+							}
+							
+						}
+						
+                    }
+                }
+            }
+        }
+        
+        stage('Deploy Application') {
+            when {
+                expression { BRANCH_NAME ==~ /(develop|^(\d+\.\d+\.\d+))/ }
+            }
+            steps {
+                script {
+                    //  Execute Ansible Playbook
+                    sh "docker exec -i ansible ansible-playbook -i /playbooks/inventory /playbooks/update-service.yaml \
+                        -e target=service_host \
+                        -e service=${SERVICE_NAME} \
+                        -e image=${IMAGE_NAME} \
+                        -e tag=${IMAGE_TAG} \
+                        -e version=${CHART_VERSION} \
+                        -e branch=${BRANCH_NAME}"
+                }
+            }
+        }
+        
+    }
+
+}

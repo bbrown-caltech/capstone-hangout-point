@@ -1,0 +1,16 @@
+---
+- name: Update Capstone Application
+  hosts: "{{ target }}"
+  user: caltech
+  tasks:
+    - name: Stop Running Application
+      command: sh -c 'sudo docker-compose -f /root/docker/caltech/docker-compose.yml rm -f -s {{ service }}'
+
+    - name: Login to Docker Registry
+      command: sh -c 'docker login {{ registry }} --username {{ uid }} --password {{ pwd }}'
+
+    - name: Get Latest Image
+      command: sh -c 'docker pull {{ image }}:{{ tag }}'
+
+    - name: Start Application
+      command: sh -c 'APPLICATION_VERSION={{ version }} sudo docker-compose -f /root/docker/caltech/docker-compose.yml up -d {{ service }}'

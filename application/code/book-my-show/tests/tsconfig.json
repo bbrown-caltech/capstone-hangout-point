@@ -1,0 +1,27 @@
+{
+    "extends": "../tsconfig.json",
+    "compilerOptions": {
+      "baseUrl": "./",
+      "module": "commonjs",
+      "experimentalDecorators": true,
+      "strictPropertyInitialization": false,
+      "isolatedModules": false,
+      "strict": false,
+      "noImplicitAny": false,
+      "sourceMap": true,
+      "types": [
+        "mocha"
+      ],
+      "typeRoots" : [
+        "../node_modules/@types"
+      ]
+    },
+    "exclude": [
+      "../node_modules",
+      "../src/**/*"
+    ],
+    "include": [
+      "./**/*.ts",
+      "init.js"
+, "booking-service.unit.test.ts"    ]
+}

@@ -1,0 +1,53 @@
+{
+    "name": "book-my-show",
+    "version": "0.1.0",
+    "scripts": {
+        "prebuild": "node pre-build-clean.js",
+        "build": "tsc",
+        "postbuild": "node copy.js && cd build && npm install --only=production && cd .. && node post-build-clean.js && node-sass ./src/application -o ./build/js/application && node-sass ./src/static/assets/css -o ./build/assets/css",
+        "updateapp": "tsc",
+        "postupdateapp": "node post-build-clean.js",
+        "clean": "node pre-build-clean.js",
+        "copy": "node copy.js",
+        "start": "live-server --host=localhost --port=8080 --root=/build --browser=Chrome /build",
+        "sass-build": "node-sass ./src/application -o ./build/js/application && node-sass ./src/static/assets/css -o ./build/assets/css",
+        "test": "cross-env TS_NODE_FILES=true mocha --require tests/init.js tests/**/*.ts",
+        "coverage": "nyc npm run test",
+        "report-coverage": "node ./node_modules/nyc/bin/nyc.js report --reporter=lcov --reporter=text --report-dir=coverage"
+    },
+    "dependencies": {
+        "@amcharts/amcharts4": "^4.10.17",
+        "@fortawesome/fontawesome-svg-core": "^1.2.32",
+        "@fortawesome/free-brands-svg-icons": "^5.15.1",
+        "@fortawesome/free-regular-svg-icons": "^5.15.1",
+        "fs": "0.0.1-security",
+        "google-charts": "^2.0.0",
+        "idb": "^4.0.1",
+        "pikaday": "^1.8.2",
+        "reflect-metadata": "^0.1.13",
+        "rxjs": "^6.6.3",
+        "typescript": "^4.3.2"
+    },
+    "devDependencies": {
+        "@testdeck/mocha": "^0.1.2",
+        "@types/chai": "^4.2.18",
+        "@types/cucumber": "^7.0.0",
+        "@types/isomorphic-fetch": "^0.0.35",
+        "@types/mocha": "^8.2.2",
+        "@types/node": "^15.12.2",
+        "chai": "^4.3.4",
+        "cross-env": "^7.0.3",
+        "cucumber": "^6.0.5",
+        "cucumber-tsflow": "^4.0.0-rc.1",
+        "eslint": "^7.17.0",
+        "eslint-config-google": "^0.14.0",
+        "fs-extra": "^9.0.1",
+        "isomorphic-fetch": "^3.0.0",
+        "mocha": "^9.0.0",
+        "node-sass": "^5.0.0",
+        "nyc": "^15.1.0",
+        "sonarqube-scanner": "^2.8.0",
+        "ts-mockito": "^2.6.1",
+        "ts-node": "^10.0.0"
+    }
+}

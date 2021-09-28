@@ -1,0 +1,22 @@
+
+
+$panel-dropshadow: -4px 4px 15px 3px rgba(187,187,187,.5);
+
+@mixin drop-shadow($dropshadow)
+{
+    -moz-box-shadow: $dropshadow;
+	-webkit-box-shadow: $dropshadow;
+	box-shadow: $dropshadow;
+}
+
+
+.booking-panel {
+    width: 70%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+
+.floating-panel {
+    @include drop-shadow($panel-dropshadow);
+}

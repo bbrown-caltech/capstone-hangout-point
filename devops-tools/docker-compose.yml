@@ -1,0 +1,154 @@
+version: '3.5'
+services:
+
+##########################################################################
+#  CORE SERVICES
+##########################################################################
+  nginx:
+    container_name: nginx
+    image: ${NGINX}
+    restart: unless-stopped
+    networks:
+      - simplilearn
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./conf/:/etc/nginx/
+      - ./certs:/etc/nginx/certs
+
+##########################################################################
+#  CI/CD Application(s) and Service(s)
+##########################################################################
+
+  # Jenkins Nodes
+  jenkins:
+    container_name: jenkins
+    build:
+      context: .
+      dockerfile: ./docker-files/Jenkins.Dockerfile
+    user: root
+    restart: unless-stopped
+    networks:
+      - simplilearn
+    volumes:
+      - jenkins_data:/var/jenkins_home:z
+      - /etc/docker:/etc/docker
+      - "/root/.docker:$HOME/.docker"
+      - /usr/bin/docker:/usr/bin/docker
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  # Repository Manager
+  nexus:
+    container_name: nexus
+    image: ${NEXUS}
+    restart: unless-stopped
+    networks:
+      - simplilearn
+    volumes:
+      - nexus_data:/nexus-data:z
+
+##########################################################################
+#  CM Application(s) and Service(s)
+##########################################################################
+  ansible:
+    container_name: ansible
+    build:
+      context: .
+      dockerfile: ./docker-files/Ansible.Dockerfile
+    user: root
+    restart: unless-stopped
+    networks:
+      - simplilearn
+    volumes:
+      - ./config/ansible/playbooks:/playbooks
+      - /usr/local/bin/kubectl:/usr/bin/kubectl
+
+
+##########################################################################
+#  Project Application(s) and Service(s)
+##########################################################################
+
+  # Production
+  mongodb:
+    image: ${MONGO}
+    container_name: mongodb
+    restart: unless-stopped
+    volumes:
+      - mongo_data:/bitnami
+      - mongo-backup-data:/backup
+      - ./config/database_init.js:/docker-entrypoint-initdb.d/database_init.js
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: caltechUser
+      MONGO_INITDB_ROOT_PASSWORD: caltechPassw0rd
+    networks:
+      - simplilearn
+
+  scheduling-manager:
+    container_name: scheduling-manager
+    image: ${SCHEDULING_MANAGER}:${APPLICATION_VERSION}
+    restart: unless-stopped
+    networks:
+      - simplilearn
+    environment:
+      PREFIX: '/scheduling-manager'
+      SWAGGER_SERVER_URL: 'https://capstone.brianbrown.me/scheduling-manager'
+      MONGO_URI: 'mongodb://mongodb:27017/bookmytrip'
+
+  book-my-show:
+    container_name: book-my-show
+    image: ${BOOK_MY_SHOW}:${APPLICATION_VERSION}
+    restart: unless-stopped
+    networks:
+      - simplilearn
+    volumes:
+      - ./config/book-my-show-config.js:/usr/share/nginx/html/js/application/config.js
+
+
+  # Development
+  mongodb-dev:
+    image: ${MONGO}
+    container_name: mongodb-dev
+    restart: unless-stopped
+    volumes:
+      - mongo_dev_data:/bitnami
+      - mongo-backup-data:/backup
+      - ./config/database_init.js:/docker-entrypoint-initdb.d/database_init.js
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: caltechUser
+      MONGO_INITDB_ROOT_PASSWORD: caltechPassw0rd
+    networks:
+      - simplilearn
+
+  scheduling-manager-dev:
+    container_name: scheduling-manager-dev
+    image: ${SCHEDULING_MANAGER}:develop
+    restart: unless-stopped
+    networks:
+      - simplilearn
+    environment:
+      PREFIX: '/scheduling-manager'
+      SWAGGER_SERVER_URL: 'https://capstone-dev.brianbrown.me/scheduling-manager'
+      MONGO_URI: 'mongodb://mongodb-dev:27017/bookmytrip'
+
+  book-my-show-dev:
+    container_name: book-my-show-dev
+    image: ${BOOK_MY_SHOW}:develop
+    restart: unless-stopped
+    networks:
+      - simplilearn
+    volumes:
+      - ./config/book-my-show-dev-config.js:/usr/share/nginx/html/js/application/config.js
+
+
+volumes:
+  jenkins_data:
+  nexus_data:
+  mongo_data:
+  mongo_dev_data:
+  mongo-backup-data:
+  mongo-backup-dev-data:
+
+networks:
+  simplilearn:
+    external: true
