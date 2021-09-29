@@ -34,11 +34,9 @@ The below implementation was chosen for simplicity and portability, and enables 
 
 | Tool             | Version   | Purpose                                 |
 |------------------|-----------|-----------------------------------------|
-| Kubernetes | v1.21.5 | Container orchestration system serving as our deployment environment. |
-| Helm | v3.* | Kubernetes deployment tool for automating creation, packaging, configuration, and deployment of applications and services to Kubernetes clusters |
-| MetalLB | v0.10.2 | Software based Kubernetes load balancer which provides ingress into our cluster. |
-| Calico | v0.3.0 | Serves as our container network interface (CNI). |
+| Helm | v3.* | Kubernetes deployment tool for templating deployment artifacts that will be deployed to a Kubernetes cluster. |
 | Docker | v20.10.8 | Container runtime engine. |
+| Docker-Compose | v1.29.2 | This is a tool for defining and running multi-container Docker applications. We'll use it as our primary deployment method for both production and development instances. |
 | Nexus | v3.33.0 | Repository manager where we'll publish our artifacts. |
 | Jenkins | v2.307 | CI/CD automation server. Used to automate build, testing and deployment. |
 | Ansible | v2.10.8 | Configuration Management server. Used to automate configuration changes in server resources. |
@@ -52,9 +50,9 @@ The below implementation was chosen for simplicity and portability, and enables 
 
 The total application (APP) consists of three parts. A frontend (GUI) written in Typescript, a RESTful service (API) written in NodeJS, and a MongoDB instance (DB) for data persistence. The API will communicate with the DB for document storage and retrieval, and will respond to requests made by the GUI to save, retrieve or delete a document.
 
-The APP will be deployed in two separate namespaces, uat and prod, in order to facilitate testing and production releases. UAT will be served on ports 8080 and 8443, while PROD will be served on port 80 and 443.
+The APP will be deployed in the same Docker-Compose under two separate HTTP host headers. Capstone and Capstone-Dev. This will provide both a production instance for customers, as well as a separate instance for developer testing.
 
-As development gets completed, unit tests passed, and code is peer reviewed and merged into the develop branch, the deployments in the uat namespace will be updated in order for test engineers to perform testing. Once testing is completed, with all tests having passed, develop will be merged into the main branch which in turn will be tagged with a release number. Once that tagged versioning occurs the deployments in the prod namespace will be updated.
+As development gets completed, unit tests passed, and code is peer reviewed and merged into the develop branch, the changes will be deployed to the Capstone-Dev instance in order for test engineers to perform testing. Once testing is completed, with all tests having passed, develop will be merged into the main branch which in turn will be tagged with a release number. Once that tagged versioning occurs the changes will be deployed to the Capstone instance.
 
 <br />
 
@@ -65,13 +63,13 @@ As development gets completed, unit tests passed, and code is peer reviewed and 
         By implementing unit tests developers can test their code as it's being developed so that when they check it in they'll have high confidence that it's reasonably bug free. Additionally this will serve as the base for providing higher quality code. As code is checked in unit tests will be automatically ran. Feature branch build failures will ensure that broken code is not introduced into the main trunk.
     </li>
     <li>
-        By leveraging Kubernetes we can use the same server to deploy two different instances of our APP. This enables us to perform regression and integration testing before deploying to production. 
+        By leveraging Docker-Compose and two separate HTTP host headers we can use the same server to deploy two different instances of our APP. This enables us to perform regression and integration testing before deploying to production. 
     </li>
     <li>
         By catching bugs prior to release, code quality increases and customer satisfaction improves.
     </li>
     <li>
-        Through automated build, testing and deployment, manual performance of those tasks is eliminated and software updates occur consistently.
+        Through automated build, testing and deployment, manual performance of those tasks is eliminated and software updates occur faster and more consistently.
     </li>
 </ol>
 
@@ -83,7 +81,7 @@ While the above is a step in the right direction it should not be viewed as the 
 
 <ol>
     <li>
-        When possible provision two separate clusters for testing/demo and production. While the former can be provisioned as a single node cluster, the production environment should be a minimum 3 node cluster.
+        When possible two separate Kubernetes clusters should be provisioned for testing/demo and production. The former can be provisioned as a single node cluster but the production environment should be a minimum 3 node cluster.
     </li>
     <li>
         The production environment should be replicated to a failover environment to ensure disaster recovery and business continuity.
