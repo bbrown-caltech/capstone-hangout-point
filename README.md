@@ -34,7 +34,7 @@ The below implementation was chosen for simplicity and portability, and enables 
 
 | Tool             | Version   | Purpose                                 |
 |------------------|-----------|-----------------------------------------|
-| Helm | v3.* | Kubernetes deployment tool for templating deployment artifacts that will be deployed to a Kubernetes cluster. |
+| Helm | v3.* | Kubernetes deployment tool for templating deployment artifacts and deploying them to a Kubernetes cluster. While this isn’t a Kubernetes deployment, Helm is being used to build support for the “Suggested Improvement” of deploying to a Kubernetes cluster. |
 | Docker | v20.10.8 | Container runtime engine. |
 | Docker-Compose | v1.29.2 | This is a tool for defining and running multi-container Docker applications. We'll use it as our primary deployment method for both production and development instances. |
 | Nexus | v3.33.0 | Repository manager where we'll publish our artifacts. |
